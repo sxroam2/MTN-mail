@@ -585,14 +585,14 @@ Page({
       })
     }
 
+    if (preferredPoi) {
+      appendItem(preferredPoi)
+    }
+
     var pois = result && Array.isArray(result.pois) ? result.pois : []
     pois.forEach(function (item) {
       appendItem(item)
     })
-
-    if (preferredPoi) {
-      appendItem(preferredPoi)
-    }
 
     return list.slice(0, 12)
   },
@@ -688,6 +688,44 @@ Page({
       longitude: selectedLocation.longitude,
       markers: buildMarker(selectedLocation.latitude, selectedLocation.longitude),
       selectedLocation: selectedLocation,
+      selectedPoiKey: selectedPoiKey,
+      poiList: nextPoiList
+    })
+  },
+
+  applyPoiSelection: function (item) {
+    var currentLocation = this.data.selectedLocation || {}
+    var currentCity = this.data.currentCity || {}
+    var latitude = Number(item.latitude) || this.data.latitude || DEFAULT_LOCATION.latitude
+    var longitude = Number(item.longitude) || this.data.longitude || DEFAULT_LOCATION.longitude
+    var selectedPoiKey = trimValue(item.key) || this.buildPoiKey(item.title, item.address)
+    var province = trimValue(item.province) || trimValue(currentLocation.province) || trimValue(currentCity.province)
+    var city = trimValue(item.city) || trimValue(currentLocation.city) || trimValue(currentCity.name)
+    var district = trimValue(item.district) || trimValue(currentLocation.district)
+    var title = trimValue(item.title || item.name) || '已选位置'
+    var address = trimValue(item.address)
+    var locationAddress = address || [province, city, district, title].filter(hasValue).join('') || title
+    var nextPoiList = this.data.poiList.map(function (poi) {
+      return Object.assign({}, poi, { active: poi.key === selectedPoiKey })
+    })
+
+    this._pendingProgrammaticCenterKey = buildCoordinateKey(latitude, longitude)
+
+    this.setData({
+      latitude: latitude,
+      longitude: longitude,
+      markers: buildMarker(latitude, longitude),
+      selectedLocation: {
+        latitude: latitude,
+        longitude: longitude,
+        province: province,
+        city: city,
+        district: district,
+        street: '',
+        detailAddress: address,
+        locationName: title,
+        locationAddress: locationAddress
+      },
       selectedPoiKey: selectedPoiKey,
       poiList: nextPoiList
     })
@@ -839,11 +877,7 @@ Page({
       return
     }
 
-    this.setData({
-      selectedPoiKey: trimValue(item.key) || this.buildPoiKey(item.title, item.address)
-    })
-
-    this.refreshByCoordinate(item.latitude, item.longitude, item)
+    this.applyPoiSelection(item)
   },
 
   locateCurrentPosition: function () {

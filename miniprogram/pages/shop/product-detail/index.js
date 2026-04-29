@@ -89,6 +89,18 @@ function buildBuyNowCheckoutUrl(productId, packageId, quantity, addressId) {
   return url
 }
 
+function rpxToPx(rpx) {
+  try {
+    var windowInfo = typeof wx.getWindowInfo === 'function'
+      ? wx.getWindowInfo()
+      : wx.getSystemInfoSync()
+    var windowWidth = Number(windowInfo && windowInfo.windowWidth) || 375
+    return Math.round(Number(rpx || 0) * windowWidth / 750)
+  } catch (error) {
+    return Math.round(Number(rpx || 0) / 2)
+  }
+}
+
 Page({
   data: {
     productId: 0,
@@ -189,13 +201,42 @@ Page({
   /** 点击导航菜单滚动到对应区域 */
   scrollToSection: function (e) {
     var section = e.currentTarget.dataset.section
-    this.setData({ activeTab: section })
     var that = this
-    wx.createSelectorQuery().select('#section-' + section).boundingClientRect().selectViewport().scrollOffset().exec(function (res) {
-      if (res[0] && res[1]) {
-        var offset = 96
-        wx.pageScrollTo({ scrollTop: res[1].scrollTop + res[0].top - offset, duration: 300 })
+
+    this.setData({ activeTab: section })
+
+    if (section === 'product') {
+      wx.pageScrollTo({ scrollTop: 0, duration: 300 })
+      return
+    }
+
+    wx.pageScrollTo({
+      selector: '#anchor-' + section,
+      duration: 300,
+      fail: function () {
+        that.scrollToSectionByKey(section, 0)
       }
+    })
+  },
+
+  scrollToSectionByKey: function (section, retryCount) {
+    var that = this
+    var query = wx.createSelectorQuery().in(this)
+    query.select('#anchor-' + section).boundingClientRect()
+    query.selectViewport().scrollOffset()
+    query.exec(function (res) {
+      if (!res || !res[0] || !res[1]) {
+        if (retryCount < 2) {
+          setTimeout(function () {
+            that.scrollToSectionByKey(section, retryCount + 1)
+          }, 80)
+        }
+        return
+      }
+
+      var offset = rpxToPx(16)
+      var scrollTop = Math.max(0, res[1].scrollTop + res[0].top - offset)
+      wx.pageScrollTo({ scrollTop: scrollTop, duration: 300 })
     })
   },
 
@@ -460,12 +501,7 @@ Page({
   },
 
   handleGoodsActionAddToCart: function () {
-    var detail = this.getSelectedActionDetail()
-    if (!detail) {
-      this.openSkuForCart()
-      return
-    }
-    this.executeAddToCart(detail)
+    this.openSkuForCart()
   },
 
   handleGoodsActionBuyNow: function () {

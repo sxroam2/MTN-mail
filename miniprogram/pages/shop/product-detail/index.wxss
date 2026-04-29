@@ -89,6 +89,10 @@ page {
 /* 轮播图 */
 .swiper-wrap {
   position: relative;
+  margin: 20rpx 24rpx 0;
+  border-radius: 24rpx 24rpx 0 0;
+  overflow: hidden;
+  background: #1a1a1a;
 }
 .image-swiper {
   width: 100%;
@@ -114,7 +118,8 @@ page {
 /* 价格区域 */
 .price-section {
   padding: 30rpx;
-  background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+  margin: 0 24rpx;
+  background: #1a1a1a;
 }
 .price-header {
   display: flex;
@@ -194,6 +199,12 @@ page {
   color: #fff;
   font-weight: 500;
   margin-bottom: 20rpx;
+}
+
+.section-anchor {
+  height: 0;
+  margin-top: -112rpx;
+  padding-top: 112rpx;
 }
 
 /* 已选规格入口 */

@@ -391,6 +391,12 @@
   color: #ddd;
 }
 
+.required-star {
+  margin-left: 4rpx;
+  color: #ff4d4f;
+  font-weight: 700;
+}
+
 .row__val {
   display: flex;
   align-items: center;

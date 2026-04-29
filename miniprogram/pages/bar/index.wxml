@@ -7,7 +7,7 @@
     </view>
     <view class="user-info">
       <text class="nickname">{{nickname || '微信用户'}}</text>
-      <text class="welcome">手机号：{{userPhone}}</text>
+      <text class="welcome">手机号：{{maskedUserPhone || userPhone}}</text>
     </view>
   </view>
 

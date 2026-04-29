@@ -8,7 +8,7 @@
         <text class="status-sub">超时订单将自动关闭</text>
       </view>
       <view class="status-top-btns">
-        <button wx:if="{{ order.orderStatus === 0 }}" class="btn-cancel-top" bindtap="cancelOrder">取消订单</button>
+        <button wx:if="{{ order.orderStatus === 0 || order.orderStatus === 7 }}" class="btn-cancel-top" bindtap="cancelOrder">取消订单</button>
         <button class="btn-pay-top" bindtap="payOrder">去支付 ¥{{ order.payAmount }}</button>
       </view>
     </view>
@@ -268,7 +268,6 @@
 
       <block wx:elif="{{ afterSalesOrderStage === 3 }}">
         <button wx:if="{{ canRequestAfterSales }}" class="action-btn action-btn--accent" bindtap="goRefund">{{ afterSalesActionText }}</button>
-        <button wx:if="{{ logistics || order.logisticsNo }}" class="action-btn action-btn--neutral" bindtap="goLogistics">物流轨迹</button>
       </block>
     </view>
   </block>

@@ -228,9 +228,9 @@
 
 .drawer-panel {
   width: 100%;
-  padding: 18rpx 32rpx calc(env(safe-area-inset-bottom) + 24rpx);
+  padding: 18rpx 28rpx calc(env(safe-area-inset-bottom) + 24rpx);
   border-radius: 32rpx 32rpx 0 0;
-  background: #101010;
+  background: #111111;
   box-shadow: 0 -12rpx 36rpx rgba(0, 0, 0, 0.32);
   box-sizing: border-box;
 }
@@ -244,7 +244,7 @@
 }
 
 .drawer-header {
-  padding: 24rpx 8rpx 20rpx;
+  padding: 24rpx 8rpx 16rpx;
   text-align: center;
 }
 
@@ -255,40 +255,29 @@
   color: #ffffff;
 }
 
-.drawer-subtitle {
-  display: block;
-  margin-top: 10rpx;
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.6);
-}
-
 .drawer-actions {
   display: flex;
   flex-direction: column;
-  margin-top: 8rpx;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 14rpx;
+  margin-top: 10rpx;
 }
 
 .drawer-action,
 .drawer-cancel {
-  min-height: 88rpx;
+  min-height: 84rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  background: transparent;
+  border-radius: 22rpx;
 }
 
 .drawer-action {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.drawer-action--accent {
-  border-bottom-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .drawer-action--danger {
-  border-bottom-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 106, 69, 0.1);
 }
 
 .drawer-action__text,
@@ -307,7 +296,7 @@
 
 .drawer-cancel {
   margin-top: 14rpx;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .drawer-cancel__text {

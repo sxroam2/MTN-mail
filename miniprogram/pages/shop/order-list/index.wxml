@@ -140,7 +140,7 @@
               data-no="{{ item.orderNo }}"
               catchtap="cancelOrder"
             >
-              取消支付
+              取消订单
             </van-button>
             <van-button
               wx:if="{{ item.canDelete }}"

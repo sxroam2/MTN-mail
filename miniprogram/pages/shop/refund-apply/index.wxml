@@ -134,7 +134,7 @@
 
       <view class="row row--column" bindtap="chooseAddress">
         <view class="row__head">
-          <text class="row__label">寄回地址</text>
+          <text class="row__label">寄回地址<text class="required-star">*</text></text>
           <van-icon name="arrow" size="14px" color="#888" />
         </view>
         <block wx:if="{{ selectedAddress }}">
@@ -146,14 +146,14 @@
 
       <block wx:if="{{ shippingMethod === 'pickup' }}">
         <view class="row" bindtap="openPickupDateSheet">
-          <text class="row__label">上门日期</text>
+          <text class="row__label">上门日期<text class="required-star">*</text></text>
           <view class="row__val">
             <text class="{{ pickupDate ? '' : 'placeholder' }}">{{ pickupDate || '请选择' }}</text>
             <van-icon name="arrow" size="14px" color="#888" />
           </view>
         </view>
         <view class="row" bindtap="openPickupSlotSheet">
-          <text class="row__label">时间段</text>
+          <text class="row__label">时间段<text class="required-star">*</text></text>
           <view class="row__val">
             <text wx:if="{{ pickupSlotText }}">{{ pickupSlotText }}</text>
             <text wx:elif="{{ pickupDate && !pickupSlotLabels.length }}" class="placeholder">当天无可选时段</text>
@@ -166,7 +166,7 @@
 
     <view class="card">
       <view class="row" bindtap="showReasons">
-        <text class="row__label">售后原因</text>
+        <text class="row__label">售后原因<text class="required-star">*</text></text>
         <view class="row__val">
           <text class="{{ reasonText ? '' : 'placeholder' }}">{{ reasonText || '请选择' }}</text>
           <van-icon name="arrow" size="14px" color="#888" />
@@ -175,7 +175,7 @@
 
       <view wx:if="{{ requiresCustomRefundAmount }}" class="row row--column">
         <view class="row__head">
-          <text class="row__label">售后金额</text>
+          <text class="row__label">售后金额<text class="required-star">*</text></text>
           <text wx:if="{{ customAmountHint }}" class="row__hint">{{ customAmountHint }}</text>
         </view>
         <input
@@ -206,6 +206,7 @@
         <van-uploader
           file-list="{{ fileList }}"
           max-count="4"
+          multiple="{{ true }}"
           bind:after-read="onAfterRead"
           bind:delete="onDeleteImage"
           accept="image"
@@ -402,6 +403,7 @@
             </scroll-view>
 
             <view wx:if="{{ exchangeDrawerPackagesLoading }}" class="exchange-drawer__state">规格加载中...</view>
+            <view wx:elif="{{ !exchangeDrawerProductId }}" class="exchange-drawer__state">请选择上方商品</view>
             <scroll-view wx:else scroll-y class="exchange-drawer__package-list">
               <view
                 wx:for="{{ exchangeDrawerPackages }}"

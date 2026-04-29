@@ -263,9 +263,9 @@ Page({
       showCountdown: !isExpired && Boolean(order.expireTime) && (order.orderStatus === 0 || order.orderStatus === 7) && remainingSeconds > 0,
       isExpired: isExpired,
       canPay: !isExpired && (order.orderStatus === 0 || order.orderStatus === 7),
-      canCancel: !isExpired && order.orderStatus === 0,
+      canCancel: !isExpired && (order.orderStatus === 0 || order.orderStatus === 7),
       canConfirm: canConfirmReceipt(order),
-      canDelete: showRefundClosedBuyAgainOnly ? false : (order.orderStatus === 3 || order.orderStatus === 4),
+      canDelete: showRefundClosedBuyAgainOnly ? false : order.orderStatus === 4,
       canTrack: showRefundClosedBuyAgainOnly ? false : (Boolean(order.logisticsNo) && (order.orderStatus === 2 || order.orderStatus === 3)),
       canBuyAgain: showRefundClosedBuyAgainOnly || order.orderStatus === 3 || order.orderStatus === 4,
       isExpanded: false,
@@ -608,7 +608,7 @@ Page({
         showCountdown: !isExpired && Boolean(order.expireTime) && remainingSeconds > 0,
         isExpired: isExpired,
         canPay: !isExpired,
-        canCancel: !isExpired && order.orderStatus === 0
+        canCancel: !isExpired && (order.orderStatus === 0 || order.orderStatus === 7)
       })
 
       if (
@@ -776,7 +776,7 @@ Page({
     var order = (this.data.orders || []).find(function (item) {
       return item.orderNo === orderNo
     })
-    if (!orderNo || !order || Number(order.orderStatus) !== 0) {
+    if (!orderNo || !order || (Number(order.orderStatus) !== 0 && Number(order.orderStatus) !== 7)) {
       wx.showToast({ title: '支付确认中，暂不能取消订单', icon: 'none' })
       return
     }
@@ -908,6 +908,13 @@ Page({
   deleteOrder: function (e) {
     var that = this
     var orderNo = e.currentTarget.dataset.no
+    var order = (that.data.orders || []).find(function (item) {
+      return item.orderNo === orderNo
+    })
+    if (!order || Number(order.orderStatus) !== 4) {
+      wx.showToast({ title: '仅交易关闭订单可删除', icon: 'none' })
+      return
+    }
     wx.showModal({
       title: '提示',
       content: '确定删除该订单吗？删除后不可恢复',

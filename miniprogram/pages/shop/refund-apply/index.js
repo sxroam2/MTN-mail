@@ -128,16 +128,17 @@ Page({
   _preferredAfterSaleType: '',
 
   onLoad: function (options) {
+    var defaultPickupSelection = this.buildDefaultPickupSelection()
     this._pickupFeeRules = []
     this._expressRules = []
     this._productPackageCache = {}
     this._preferredAfterSaleType = String(options.afterSaleType || '').trim().toLowerCase()
     this._pageConfig = afterSalesUtil.getFallbackOrderDetailPageConfig()
-    this.setData({
+    this.setData(Object.assign({
       orderNo: options.orderNo || '',
       itemId: options.itemId ? Number(options.itemId) : null,
       pickupDateStart: this.formatDate(new Date())
-    })
+    }, defaultPickupSelection))
     this.loadPageConfig()
     this.loadSupportData()
     this.loadDetail()
@@ -157,6 +158,48 @@ Page({
     if (current && current._selectedAddress) {
       this.applySelectedAddress(current._selectedAddress)
       current._selectedAddress = null
+    }
+  },
+
+  buildDefaultPickupSelection: function () {
+    var now = new Date()
+    if (now.getHours() >= 20) {
+      return {}
+    }
+
+    var pickupDate = this.formatDate(now)
+    var slotOptions = afterSalesUtil.buildPickupSlots(pickupDate, now)
+    var firstSlot = slotOptions[0]
+    if (!firstSlot) {
+      return {}
+    }
+
+    return {
+      pickupDate: pickupDate,
+      pickupSlotOptions: slotOptions,
+      pickupSlotLabels: slotOptions.map(function (item) { return item.label }),
+      pickupSlotIndex: 0,
+      pickupSlotValue: firstSlot.value,
+      pickupSlotText: firstSlot.label
+    }
+  },
+
+  buildOrderReturnAddress: function (order) {
+    if (!order || !order.snapReceiver || !order.snapAddress) {
+      return null
+    }
+
+    var addressId = order.addressId || order.receiverAddressId || order.addressKey || ''
+    return {
+      id: addressId || null,
+      receiverName: order.snapReceiver || '',
+      receiverPhone: order.snapPhone || '',
+      province: '',
+      city: '',
+      district: '',
+      street: '',
+      detailAddress: order.snapAddress || '',
+      fullAddressText: order.snapAddress || ''
     }
   },
 
@@ -222,6 +265,8 @@ Page({
         items: items
       }
 
+      var defaultReturnAddress = that.data.selectedAddress || that.buildOrderReturnAddress(rawOrder)
+
       that.setData({
         order: Object.assign({}, rawOrder, {
           createTimeText: that.formatTime(rawOrder.createTime),
@@ -236,6 +281,7 @@ Page({
           afterSalesRequests: data.afterSalesRequests || [],
           items: items
         }),
+        selectedAddress: defaultReturnAddress,
         loading: false
       })
       that.applyPageState()
@@ -927,18 +973,34 @@ Page({
     }))
   },
 
+  clearExchangeDrawerPickedProduct: function () {
+    this.syncExchangeDrawerSelectionState({
+      exchangeDrawerProductId: null,
+      exchangeDrawerProductTitle: '',
+      exchangeDrawerProductDescription: '',
+      exchangeDrawerProductImg: '',
+      exchangeDrawerPackages: [],
+      exchangeDrawerPackagesLoading: false,
+      exchangeDrawerPackageId: null,
+      exchangeDrawerQuantity: 1
+    })
+  },
+
   selectExchangeDrawerCategory: function (e) {
     var key = String(e.currentTarget.dataset.key || '__all__')
     if (key === this.data.activeProductCategory) return
     this.applyFilteredProductCatalog(key)
+    this.clearExchangeDrawerPickedProduct()
   },
 
   onExchangeDrawerKeywordInput: function (e) {
     var keyword = String(e.detail.value || '')
     this.setData({
-      exchangeDrawerKeyword: keyword
+      exchangeDrawerKeyword: keyword,
+      activeProductCategory: '__all__'
     }, function () {
-      this.applyFilteredProductCatalog(this.data.activeProductCategory)
+      this.applyFilteredProductCatalog('__all__')
+      this.clearExchangeDrawerPickedProduct()
     }.bind(this))
   },
 
@@ -1561,7 +1623,7 @@ Page({
       pickupWindowEnd: this.data.requiresReturnFlow && this.data.shippingMethod === 'pickup' && pickupOption ? pickupOption.endText : null,
       returnLogisticsCompany: null,
       returnTrackingNo: null,
-      returnAddressKey: this.data.requiresReturnFlow && this.data.selectedAddress ? String(this.data.selectedAddress.id) : null,
+      returnAddressKey: this.data.requiresReturnFlow && this.data.selectedAddress && this.data.selectedAddress.id ? String(this.data.selectedAddress.id) : null,
       returnAddressText: this.data.requiresReturnFlow && this.data.selectedAddress ? afterSalesUtil.buildReturnAddressText(this.data.selectedAddress) : null,
       isSpeedRefund: this.isEligibleForSpeedRefund()
     }

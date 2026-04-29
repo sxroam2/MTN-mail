@@ -60,7 +60,6 @@
       <view class="drawer-handle"></view>
       <view class="drawer-header">
         <text class="drawer-title">设备操作</text>
-        <text class="drawer-subtitle">{{selectedDevice.displayName || selectedDevice.name || '当前设备'}}</text>
       </view>
 
       <view class="drawer-actions">

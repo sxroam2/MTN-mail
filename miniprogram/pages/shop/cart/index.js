@@ -43,8 +43,9 @@ Page({
   onShow: function () {
     if (api.isLoggedIn()) {
       this.loadCart()
-      this.loadDeliveryAddress()
-      this.syncSelectedAddressFromPage()
+      if (!this.syncSelectedAddressFromPage()) {
+        this.loadDeliveryAddress()
+      }
     } else {
       this._checkedIdsInitialized = false
       this._checkedIdsSnapshot = []
@@ -181,7 +182,9 @@ Page({
         wx.showToast({ title: '小程序暂不支持国际地址', icon: 'none' })
       }
       current._selectedAddress = null
+      return true
     }
+    return false
   },
 
   goAddressSelect: function () {

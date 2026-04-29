@@ -652,7 +652,7 @@ Page({
   },
 
   cancelOrder: function () {
-    if (!this.data.order || Number(this.data.order.orderStatus) !== 0) {
+    if (!this.data.order || !isPendingPaymentStatus(Number(this.data.order.orderStatus))) {
       wx.showToast({ title: '支付确认中，暂不能取消订单', icon: 'none' })
       return
     }

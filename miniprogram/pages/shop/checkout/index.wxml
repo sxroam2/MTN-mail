@@ -186,9 +186,10 @@
     <!-- 发票须知弹窗 -->
     <van-dialog use-slot show="{{ invoiceNoticeVisible }}" title="发票须知" confirm-button-text="我知道了" confirm-button-color="#ff6a45" bind:confirm="closeInvoiceNotice">
       <view class="notice-content">
-        <view class="notice-item">1、电子发票是税局认可的有效收付款凭证，其法律效力、基本用途及使用规定同纸质发票，支持报销入账。如需纸质发票可自行下载打印。</view>
-        <view class="notice-item">2、如下单使用会员余额或礼品卡支付，则不提供发票。</view>
-        <view class="notice-item">3、如申请发票时填写发票抬头错误，请联系商家将发票冲红后再重新开票。</view>
+        <view class="notice-item">1、电子发票与纸质发票具有同等法律效力，可作为报销入账凭证；如需纸质件，可下载后自行打印。</view>
+        <view class="notice-item">2、开票金额以订单实际支付金额为准，包含商品实付金额及实际支付的运费，不包含已退款金额。</view>
+        <view class="notice-item">3、企业发票请准确填写发票抬头和纳税人识别号；申请增值税专用发票时，还需补充开户银行、银行账号、企业地址和电话。</view>
+        <view class="notice-item">4、发票将发送至填写的收票邮箱。如开票信息填写错误，请及时联系商家处理红冲后重新开具。</view>
       </view>
     </van-dialog>
   </block>

@@ -15,9 +15,11 @@
         </view>
         <view class="hero-card__info">
           <text class="hero-card__company">{{ logistics.logisticsCompany || '物流公司' }}</text>
-          <text class="hero-card__no">运单号：{{ logistics.logisticsNo || '待生成' }}</text>
+          <view class="hero-card__no-row">
+            <text class="hero-card__no">运单号：{{ logistics.logisticsNo || '待生成' }}</text>
+            <text wx:if="{{ logistics.logisticsNo }}" class="copy-btn" bindtap="copyLogisticsNo">复制</text>
+          </view>
         </view>
-        <view wx:if="{{ logistics.logisticsNo }}" class="hero-card__copy" bindtap="copyLogisticsNo">复制</view>
       </view>
 
       <view wx:if="{{ latestTrace }}" class="hero-card__latest">

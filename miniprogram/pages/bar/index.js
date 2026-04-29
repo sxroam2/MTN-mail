@@ -12,6 +12,21 @@ function normalizeNickname(value) {
   return nickname || DEFAULT_NICKNAME;
 }
 
+function maskPhone(value) {
+  const phone = String(value || '').trim();
+  const digits = phone.replace(/\D/g, '');
+
+  if (digits.length >= 11) {
+    return digits.slice(0, 3) + '****' + digits.slice(-4);
+  }
+
+  if (phone.length > 7) {
+    return phone.slice(0, 3) + '****' + phone.slice(-4);
+  }
+
+  return phone;
+}
+
 function resolveAvatarUrl(value) {
   const avatarUrl = String(value || '').trim();
 
@@ -121,6 +136,7 @@ Page({
     version: app.globalData.version,
     isLoggedIn: false,
     userPhone: '',
+    maskedUserPhone: '',
     phoneLoginPending: false,
     profileSyncPending: false,
     privacyNeedAuthorization: false,
@@ -165,9 +181,12 @@ Page({
     const platform = wx.getSystemInfoSync().platform;
     const mockLoginState = getMockLoginState(platform);
 
+    const storedPhone = wx.getStorageSync('userPhone') || '';
+
     this.setData({
       isLoggedIn: isLoggedIn,
-      userPhone: wx.getStorageSync('userPhone') || '',
+      userPhone: storedPhone,
+      maskedUserPhone: maskPhone(storedPhone),
       miniProgramEnvVersion: mockLoginState.envVersion,
       isMockLoginAvailable: mockLoginState.enabled,
       mockLoginTip: mockLoginState.tip
@@ -233,7 +252,8 @@ Page({
       nickname: nickname,
       tempNickname: nickname,
       avatarUrl: avatarUrl,
-      userPhone: userPhone || this.data.userPhone
+      userPhone: userPhone || this.data.userPhone,
+      maskedUserPhone: maskPhone(userPhone || this.data.userPhone)
     });
   },
 
@@ -254,7 +274,8 @@ Page({
       if (!api.isLoggedIn()) {
         that.setData({
           isLoggedIn: false,
-          userPhone: ''
+          userPhone: '',
+          maskedUserPhone: ''
         });
         that.resetBluetoothDebugMenu();
       }
@@ -281,7 +302,8 @@ Page({
       if (!api.isLoggedIn()) {
         that.setData({
           isLoggedIn: false,
-          userPhone: ''
+          userPhone: '',
+          maskedUserPhone: ''
         });
         that.resetBluetoothDebugMenu();
         return null;
@@ -295,7 +317,8 @@ Page({
       if (!api.isLoggedIn()) {
         that.setData({
           isLoggedIn: false,
-          userPhone: ''
+          userPhone: '',
+          maskedUserPhone: ''
         });
       }
       that.resetBluetoothDebugMenu();
@@ -331,7 +354,8 @@ Page({
     });
     this.setData({
       isLoggedIn: true,
-      userPhone: loginData.phone || this.data.userPhone
+      userPhone: loginData.phone || this.data.userPhone,
+      maskedUserPhone: maskPhone(loginData.phone || this.data.userPhone)
     });
     this.loadBluetoothDebugMenu();
     this.syncProfileFromServer();
@@ -544,6 +568,7 @@ Page({
     this.setData({
       isLoggedIn: false,
       userPhone: '',
+      maskedUserPhone: '',
       showUserDialog: false,
       profileSyncPending: false,
       showBluetoothDebugMenu: false
@@ -660,7 +685,8 @@ Page({
           api.clearToken();
           that.setData({
             isLoggedIn: false,
-            userPhone: ''
+            userPhone: '',
+            maskedUserPhone: ''
           });
           that.resetBluetoothDebugMenu();
         }
