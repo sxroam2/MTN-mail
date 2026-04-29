@@ -1,0 +1,64 @@
+<view class="page">
+  <van-loading wx:if="{{ loading }}" size="36px" color="#ff6a45" vertical class="page-loading">加载中...</van-loading>
+
+  <block wx:else>
+    <view wx:if="{{ addresses.length === 0 }}" class="empty-wrap">
+      <van-icon name="location-o" size="60px" color="#555" />
+      <text class="empty-text">暂无收货地址</text>
+      <text class="empty-subtext">点击下方按钮新增第一条收货地址</text>
+      <van-button
+        round
+        color="linear-gradient(90deg, #ff6a45, #ff4d4f)"
+        bindtap="openAddForm"
+      >立即新建地址</van-button>
+    </view>
+
+    <view wx:else class="address-list">
+      <view
+        wx:for="{{ addresses }}"
+        wx:key="id"
+        class="address-card {{ selectMode ? 'selectable' : '' }}"
+        bindtap="selectAddress"
+        data-id="{{ item.id }}"
+      >
+        <view class="addr-main">
+          <view class="addr-top">
+            <view class="addr-person">
+              <text class="addr-name">{{ item.receiverName }}</text>
+              <text class="addr-phone">{{ item.receiverPhone }}</text>
+            </view>
+            <view class="tag-group">
+              <view wx:if="{{ item.label }}" class="label-tag">{{ item.label }}</view>
+              <view wx:if="{{ item.isDefault }}" class="default-tag">默认</view>
+            </view>
+          </view>
+          <text class="addr-detail">{{ item.fullAddressText }}</text>
+        </view>
+        <view class="addr-actions" catchtap="">
+          <view class="action-btn" catchtap="setDefault" data-id="{{ item.id }}">
+            <van-icon name="{{ item.isDefault ? 'checked' : 'circle' }}" size="18px" color="{{ item.isDefault ? '#ff6a45' : '#666' }}" />
+            <text class="action-text">默认</text>
+          </view>
+          <view class="action-btn" catchtap="openEditForm" data-id="{{ item.id }}">
+            <van-icon name="edit" size="18px" color="#888" />
+            <text class="action-text">编辑</text>
+          </view>
+          <view class="action-btn" catchtap="deleteAddress" data-id="{{ item.id }}">
+            <van-icon name="delete-o" size="18px" color="#888" />
+            <text class="action-text">删除</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="add-btn-wrap">
+      <van-button
+        round
+        block
+        color="linear-gradient(90deg, #ff6a45, #ff4d4f)"
+        icon="plus"
+        bindtap="openAddForm"
+      >{{ selectMode ? '新增地址后返回选择' : '新增收货地址' }}</van-button>
+    </view>
+  </block>
+</view>

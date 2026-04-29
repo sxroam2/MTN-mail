@@ -1,0 +1,137 @@
+.cancel-popup {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 calc(40rpx + env(safe-area-inset-bottom));
+  height: 860rpx;
+  box-sizing: border-box;
+}
+
+.cancel-popup__header {
+  flex-shrink: 0;
+  padding: 40rpx 32rpx 24rpx;
+  border-bottom: 1rpx solid #2a2a2a;
+  text-align: center;
+}
+
+.cancel-popup__title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+.cancel-popup__reasons {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4rpx 0;
+}
+
+.reason-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 32rpx;
+}
+
+.reason-item--active .reason-text {
+  color: #ff6a45;
+}
+
+.reason-text {
+  font-size: 30rpx;
+  color: #ccc;
+  flex: 1;
+}
+
+.reason-radio {
+  width: 30rpx;
+  height: 30rpx;
+  border-radius: 50%;
+  border: 2rpx solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reason-radio--checked {
+  background: #ff6a45;
+  border-color: #ff6a45;
+}
+
+.cancel-popup__cart-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 24rpx 32rpx;
+  border-top: 1rpx solid #222;
+  flex-shrink: 0;
+  background: #1a1a1a;
+}
+
+.cart-check {
+  width: 30rpx;
+  height: 30rpx;
+  border-radius: 50%;
+  border: 2rpx solid #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cart-check--checked {
+  background: #ff6a45;
+  border-color: #ff6a45;
+}
+
+.cart-check-label {
+  font-size: 26rpx;
+  color: #888;
+}
+
+.cancel-popup__footer {
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx 32rpx;
+  flex-shrink: 0;
+  background: #1a1a1a;
+}
+
+.cancel-popup__btn-think {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  color: #aaa;
+  background: transparent;
+  border: 1rpx solid #444;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+}
+
+.cancel-popup__btn-think::after {
+  border: none;
+}
+
+.cancel-popup__btn-confirm {
+  flex: 2;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(90deg, #ff6a45 0%, #ff4d4f 100%);
+  border: none;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+}
+
+.cancel-popup__btn-confirm::after {
+  border: none;
+}

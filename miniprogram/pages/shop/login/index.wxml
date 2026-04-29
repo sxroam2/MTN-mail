@@ -1,0 +1,58 @@
+<view class="page">
+  <view class="login-header">
+    <image class="brand-logo" src="/assets/icons/logo.png" mode="aspectFit" />
+    <text class="brand-name">Maxcellent</text>
+    <text class="brand-slogan">迈瑟伦</text>
+  </view>
+
+  <view class="login-form">
+    <van-cell-group inset custom-class="form-group">
+      <van-field
+        value="{{ phone }}"
+        label="账号"
+        placeholder="手机号 / 邮箱"
+        clearable
+        bind:change="onPhoneInput"
+      />
+      <van-field
+        value="{{ code }}"
+        label="验证码"
+        placeholder="请输入验证码"
+        type="number"
+        maxlength="6"
+        clearable
+        bind:change="onCodeInput"
+        use-button-slot
+      >
+        <van-button
+          slot="button"
+          size="small"
+          round
+          type="primary"
+          color="{{ countdown > 0 ? '#666' : 'linear-gradient(90deg, #ff6a45, #ff4d4f)' }}"
+          disabled="{{ countdown > 0 || sending }}"
+          loading="{{ sending }}"
+          bindtap="sendCode"
+        >{{ countdown > 0 ? countdown + 's' : '获取验证码' }}</van-button>
+      </van-field>
+    </van-cell-group>
+
+    <van-button
+      round
+      block
+      type="primary"
+      color="linear-gradient(90deg, #ff6a45, #ff4d4f)"
+      loading="{{ submitting }}"
+      disabled="{{ submitting || !phone || !code }}"
+      bindtap="login"
+      custom-style="margin-top: 60rpx;"
+    >登 录</van-button>
+
+    <view class="login-tip">
+      <text class="tip-text">登录即表示同意</text>
+      <text class="tip-link">《用户协议》</text>
+      <text class="tip-text">和</text>
+      <text class="tip-link">《隐私政策》</text>
+    </view>
+  </view>
+</view>

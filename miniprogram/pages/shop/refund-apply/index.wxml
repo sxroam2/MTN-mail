@@ -1,0 +1,459 @@
+<view class="page">
+  <view wx:if="{{ loading }}" class="page-state">
+    <text class="page-state__title">页面加载中...</text>
+  </view>
+
+  <view wx:elif="{{ loadError }}" class="page-state page-state--error">
+    <text class="page-state__title">{{ loadError }}</text>
+    <van-button round block color="linear-gradient(90deg, #ff6a45, #ff4d4f)" bindtap="backToDetail">返回订单详情</van-button>
+  </view>
+
+  <block wx:else>
+    <view class="card card--hero">
+      <view class="hero-head">
+        <view class="hero-head__type-wrap">
+          <view class="hero-head__type-trigger {{ availableAfterSaleTypes.length > 1 ? 'is-clickable' : '' }}" bindtap="openTypeSheet">
+            <text class="hero-head__type">{{ afterSaleTypeLabel }}</text>
+            <van-icon wx:if="{{ availableAfterSaleTypes.length > 1 }}" name="arrow" size="16px" color="#cfcfcf" />
+          </view>
+        </view>
+        <text class="hero-head__amount">¥{{ order.payAmount }}</text>
+      </view>
+      <text class="hero-head__desc">{{ afterSaleTypeDescription }}</text>
+      <view class="hero-meta">
+        <text>订单号 {{ orderNo }}</text>
+        <text wx:if="{{ order.createTimeText }}">下单 {{ order.createTimeText }}</text>
+      </view>
+      <view wx:if="{{ speedRefundVisible }}" class="hero-tip">您的订单正在享受极速退款保障服务</view>
+    </view>
+
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">售后商品</text>
+        <text wx:if="{{ forceWholeOrderRefund }}" class="card-tag">整单退款</text>
+      </view>
+
+      <view wx:for="{{ items }}" wx:key="id" class="item {{ item.afterSalesLocked ? 'item--locked' : '' }} {{ afterSaleType === 'exchange' && item.selected ? 'item--with-exchange' : '' }}">
+        <view class="item__body">
+          <view
+            wx:if="{{ !forceWholeOrderRefund }}"
+            class="item__check-left {{ item.selected ? 'is-checked' : '' }} {{ item.afterSalesLocked ? 'is-disabled' : '' }}"
+            data-id="{{ item.id }}"
+            bindtap="toggleItem"
+          >
+            <van-icon wx:if="{{ item.selected }}" name="success" size="14px" color="#fff" />
+          </view>
+
+          <van-image
+            width="120rpx"
+            height="120rpx"
+            src="{{ item.imageUrl }}"
+            fit="cover"
+            radius="12rpx"
+          />
+          <view class="item__main">
+            <text class="item__name">{{ item.productName }}</text>
+            <text wx:if="{{ item.packageName }}" class="item__spec">{{ item.packageName }}</text>
+            <view class="item__line">
+              <text class="item__price">¥{{ item.unitPrice }} × {{ item.quantity }}</text>
+              <text wx:if="{{ item.showRemainingRefundAmount }}" class="item__remain">剩可退 ¥{{ item.remainingRefundAmountText }}</text>
+            </view>
+          </view>
+
+          <view class="item__action">
+            <view wx:if="{{ item.afterSalesLocked }}" class="badge badge--locked">{{ item.lockBadgeText }}</view>
+            <view wx:elif="{{ forceWholeOrderRefund }}" class="badge badge--fixed">x{{ item.quantity }}</view>
+            <view wx:elif="{{ item.selected }}" class="stepper">
+              <view class="stepper__btn" data-id="{{ item.id }}" data-delta="-1" bindtap="changeQuantity">-</view>
+              <text class="stepper__val">{{ item.selectedQuantity }}</text>
+              <view class="stepper__btn" data-id="{{ item.id }}" data-delta="1" bindtap="changeQuantity">+</view>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{ afterSaleType === 'exchange' && item.selected }}" class="exchange-pick {{ !forceWholeOrderRefund ? 'exchange-pick--with-check' : '' }}" data-id="{{ item.id }}" bindtap="openExchangeDrawer">
+          <text class="exchange-pick__label">换为</text>
+          <view class="exchange-pick__main">
+            <block wx:if="{{ item.exchangePackageId }}">
+              <van-image
+                width="56rpx"
+                height="56rpx"
+                src="{{ item.exchangeImageUrl || item.imageUrl }}"
+                fit="cover"
+                radius="8rpx"
+              />
+              <view class="exchange-pick__text">
+                <text class="exchange-pick__name">{{ item.exchangeTitle }}</text>
+                <text class="exchange-pick__meta">{{ item.exchangePackageLabel }} · ¥{{ item.exchangePriceText }} × {{ item.exchangeQuantity || item.selectedQuantity }}</text>
+              </view>
+            </block>
+            <text wx:else class="exchange-pick__placeholder">请选择更换商品和套餐</text>
+          </view>
+          <view class="exchange-pick__action">
+            <text class="exchange-pick__action-text">{{ item.exchangePackageId ? '更换' : '选择' }}</text>
+            <van-icon name="arrow" size="12px" color="#888" />
+          </view>
+        </view>
+      </view>
+
+      <view class="summary">
+        <view class="summary__row">
+          <text>商品金额</text><text>¥{{ selectedSubtotalText }}</text>
+        </view>
+        <view wx:if="{{ showRefundSummaryCards }}" class="summary__row">
+          <text>已退金额</text><text>¥{{ selectedRefundedAmountText }}</text>
+        </view>
+        <view wx:if="{{ showRefundSummaryCards }}" class="summary__row summary__row--main">
+          <text>剩余可退</text><text class="summary__amount">¥{{ selectedRemainingRefundAmountText }}</text>
+        </view>
+        <view wx:if="{{ showPriceDiffCard && priceDiffText }}" class="summary__row">
+          <text>差价预估</text><text>{{ priceDiffText }}</text>
+        </view>
+        <view wx:if="{{ showPickupFeeCard }}" class="summary__row">
+          <text>上门取件费</text><text>{{ pickupServiceFeeText }}</text>
+        </view>
+        <view wx:if="{{ showDeliveryFeeCard }}" class="summary__row">
+          <text>{{ afterSaleType === 'exchange' ? '换货发货运费' : '维修发货运费' }}</text><text>{{ deliveryFeeText }}</text>
+        </view>
+        <view wx:if="{{ showSupplementPayment }}" class="summary__row summary__row--main">
+          <text>待支付</text><text class="summary__amount">¥{{ supplementPayAmountText }}</text>
+        </view>
+      </view>
+    </view>
+
+    
+    <view wx:if="{{ requiresReturnFlow }}" class="card">
+      <view class="card-header">
+        <text class="card-title">{{ returnFlowTitle }}</text>
+      </view>
+
+      <view class="seg">
+        <view class="seg__item {{ shippingMethod === 'pickup' ? 'is-active' : '' }}" data-method="pickup" bindtap="selectShippingMethod">上门取件</view>
+        <view class="seg__item {{ shippingMethod === 'self' ? 'is-active' : '' }}" data-method="self" bindtap="selectShippingMethod">自行寄回</view>
+      </view>
+
+      <view class="row row--column" bindtap="chooseAddress">
+        <view class="row__head">
+          <text class="row__label">寄回地址</text>
+          <van-icon name="arrow" size="14px" color="#888" />
+        </view>
+        <block wx:if="{{ selectedAddress }}">
+          <text class="addr__name">{{ selectedAddress.receiverName }} {{ selectedAddress.receiverPhone }}</text>
+          <text class="addr__detail">{{ selectedAddress.fullAddressText }}</text>
+        </block>
+        <text wx:else class="placeholder">请选择寄回地址</text>
+      </view>
+
+      <block wx:if="{{ shippingMethod === 'pickup' }}">
+        <view class="row" bindtap="openPickupDateSheet">
+          <text class="row__label">上门日期</text>
+          <view class="row__val">
+            <text class="{{ pickupDate ? '' : 'placeholder' }}">{{ pickupDate || '请选择' }}</text>
+            <van-icon name="arrow" size="14px" color="#888" />
+          </view>
+        </view>
+        <view class="row" bindtap="openPickupSlotSheet">
+          <text class="row__label">时间段</text>
+          <view class="row__val">
+            <text wx:if="{{ pickupSlotText }}">{{ pickupSlotText }}</text>
+            <text wx:elif="{{ pickupDate && !pickupSlotLabels.length }}" class="placeholder">当天无可选时段</text>
+            <text wx:else class="placeholder">请选择</text>
+            <van-icon name="arrow" size="14px" color="#888" />
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <view class="card">
+      <view class="row" bindtap="showReasons">
+        <text class="row__label">售后原因</text>
+        <view class="row__val">
+          <text class="{{ reasonText ? '' : 'placeholder' }}">{{ reasonText || '请选择' }}</text>
+          <van-icon name="arrow" size="14px" color="#888" />
+        </view>
+      </view>
+
+      <view wx:if="{{ requiresCustomRefundAmount }}" class="row row--column">
+        <view class="row__head">
+          <text class="row__label">售后金额</text>
+          <text wx:if="{{ customAmountHint }}" class="row__hint">{{ customAmountHint }}</text>
+        </view>
+        <input
+          class="input"
+          type="digit"
+          value="{{ requestedRefundAmount }}"
+          placeholder="请输入售后金额"
+          bindinput="onRequestedRefundAmountInput"
+        />
+      </view>
+
+      <view class="row row--column">
+        <text class="row__label">补充说明</text>
+        <textarea
+          class="textarea"
+          value="{{ description }}"
+          maxlength="400"
+          placeholder="请补充问题描述，方便客服更快处理"
+          bindinput="onDescChange"
+        />
+      </view>
+
+      <view class="row row--column">
+        <view class="row__head">
+          <text class="row__label">凭证图片</text>
+          <text class="row__hint">最多 4 张</text>
+        </view>
+        <van-uploader
+          file-list="{{ fileList }}"
+          max-count="4"
+          bind:after-read="onAfterRead"
+          bind:delete="onDeleteImage"
+          accept="image"
+        />
+      </view>
+    </view>
+
+
+    <view class="submit-wrap">
+      <van-button
+        round
+        block
+        color="linear-gradient(90deg, #ff6a45, #ff4d4f)"
+        loading="{{ submitting }}"
+        disabled="{{ submitting || !reasonText }}"
+        bindtap="submitAfterSales"
+      >{{ submitButtonText }}</van-button>
+    </view>
+
+    <van-popup
+      show="{{ showTypeSheet }}"
+      position="bottom"
+      round
+      custom-style="background: #1a1a1a;"
+      bind:close="closeTypeSheet"
+    >
+      <view class="drawer" catchtap="noop">
+        <view class="drawer__header"><text class="drawer__title">选择售后类型</text></view>
+        <view class="drawer__list">
+          <view
+            wx:for="{{ availableAfterSaleTypes }}"
+            wx:key="key"
+            class="drawer-item {{ tempAfterSaleType === item.key ? 'drawer-item--active' : '' }}"
+            data-type="{{ item.key }}"
+            bindtap="selectTypeItem"
+          >
+            <view class="drawer-item__content">
+              <text class="drawer-item__text">{{ item.label }}</text>
+              <text wx:if="{{ item.description }}" class="drawer-item__desc">{{ item.description }}</text>
+            </view>
+            <view class="drawer-item__radio {{ tempAfterSaleType === item.key ? 'is-checked' : '' }}">
+              <van-icon wx:if="{{ tempAfterSaleType === item.key }}" name="success" size="14px" color="#fff" />
+            </view>
+          </view>
+        </view>
+        <view class="drawer__footer">
+          <button class="drawer__btn-cancel" bindtap="closeTypeSheet">取消</button>
+          <button class="drawer__btn-confirm" bindtap="confirmTypeSheet">确认</button>
+        </view>
+      </view>
+    </van-popup>
+
+    <van-popup
+      show="{{ showReasonSheet }}"
+      position="bottom"
+      round
+      custom-style="background: #1a1a1a;"
+      bind:close="closeReasonSheet"
+    >
+      <view class="drawer" catchtap="noop">
+        <view class="drawer__header"><text class="drawer__title">选择售后原因</text></view>
+        <view class="drawer__list">
+          <view
+            wx:for="{{ reasons }}"
+            wx:key="index"
+            class="drawer-item {{ tempReason === item ? 'drawer-item--active' : '' }}"
+            data-reason="{{ item }}"
+            bindtap="selectReasonItem"
+          >
+            <text class="drawer-item__text">{{ item }}</text>
+            <view class="drawer-item__radio {{ tempReason === item ? 'is-checked' : '' }}">
+              <van-icon wx:if="{{ tempReason === item }}" name="success" size="14px" color="#fff" />
+            </view>
+          </view>
+        </view>
+        <view class="drawer__footer">
+          <button class="drawer__btn-cancel" bindtap="closeReasonSheet">再想想</button>
+          <button class="drawer__btn-confirm" bindtap="confirmReason">确认</button>
+        </view>
+      </view>
+    </van-popup>
+
+    <van-popup
+      show="{{ showPickupDateSheet }}"
+      position="bottom"
+      round
+      custom-style="background: #1a1a1a;"
+      bind:close="closePickupDateSheet"
+    >
+      <view class="drawer" catchtap="noop">
+        <view class="drawer__header"><text class="drawer__title">选择上门日期</text></view>
+        <view class="drawer__list">
+          <view
+            wx:for="{{ pickupDateOptions }}"
+            wx:key="value"
+            class="drawer-item {{ tempPickupDate === item.value ? 'drawer-item--active' : '' }}"
+            data-value="{{ item.value }}"
+            bindtap="selectPickupDateItem"
+          >
+            <text class="drawer-item__text">{{ item.label }}</text>
+            <view class="drawer-item__radio {{ tempPickupDate === item.value ? 'is-checked' : '' }}">
+              <van-icon wx:if="{{ tempPickupDate === item.value }}" name="success" size="14px" color="#fff" />
+            </view>
+          </view>
+        </view>
+        <view class="drawer__footer">
+          <button class="drawer__btn-cancel" bindtap="closePickupDateSheet">取消</button>
+          <button class="drawer__btn-confirm" bindtap="confirmPickupDate">确认</button>
+        </view>
+      </view>
+    </van-popup>
+
+    <van-popup
+      show="{{ showPickupSlotSheet }}"
+      position="bottom"
+      round
+      custom-style="background: #1a1a1a;"
+      bind:close="closePickupSlotSheet"
+    >
+      <view class="drawer" catchtap="noop">
+        <view class="drawer__header"><text class="drawer__title">选择时间段</text></view>
+        <view class="drawer__list">
+          <view
+            wx:for="{{ pickupSlotOptions }}"
+            wx:key="value"
+            class="drawer-item {{ tempPickupSlotValue === item.value ? 'drawer-item--active' : '' }}"
+            data-value="{{ item.value }}"
+            bindtap="selectPickupSlotItem"
+          >
+            <text class="drawer-item__text">{{ item.label }}</text>
+            <view class="drawer-item__radio {{ tempPickupSlotValue === item.value ? 'is-checked' : '' }}">
+              <van-icon wx:if="{{ tempPickupSlotValue === item.value }}" name="success" size="14px" color="#fff" />
+            </view>
+          </view>
+        </view>
+        <view class="drawer__footer">
+          <button class="drawer__btn-cancel" bindtap="closePickupSlotSheet">取消</button>
+          <button class="drawer__btn-confirm" bindtap="confirmPickupSlot">确认</button>
+        </view>
+      </view>
+    </van-popup>
+
+    <van-popup
+      show="{{ showExchangeDrawer }}"
+      position="bottom"
+      round
+      custom-style="background: #1a1a1a; max-height: 86vh;"
+      bind:close="closeExchangeDrawer"
+    >
+      <view class="drawer exchange-drawer" catchtap="noop">
+        <view class="drawer__header"><text class="drawer__title">选择更换商品</text></view>
+
+        <view wx:if="{{ productCatalogLoading }}" class="exchange-drawer__state">可更换商品加载中...</view>
+        <block wx:else>
+          <block wx:if="{{ productCatalog.length }}">
+            <view class="exchange-drawer__search">
+              <van-icon name="search" size="18px" color="#8f8f8f" />
+              <input
+                class="exchange-drawer__search-input"
+                value="{{ exchangeDrawerKeyword }}"
+                placeholder="搜索更换商品"
+                placeholder-class="exchange-drawer__search-placeholder"
+                confirm-type="search"
+                bindinput="onExchangeDrawerKeywordInput"
+              />
+            </view>
+
+            <scroll-view hidden="{{ productCategories.length <= 1 }}" scroll-x class="exchange-drawer__category-scroll">
+              <view class="exchange-drawer__category-tabs">
+                <view
+                  wx:for="{{ productCategories }}"
+                  wx:key="key"
+                  class="exchange-drawer__category-tab {{ activeProductCategory === item.key ? 'is-active' : '' }}"
+                  data-key="{{ item.key }}"
+                  bindtap="selectExchangeDrawerCategory"
+                >{{ item.label }}</view>
+              </view>
+            </scroll-view>
+
+            <scroll-view scroll-x class="exchange-drawer__product-scroll">
+              <view class="exchange-drawer__product-tabs">
+                <view
+                  wx:for="{{ filteredProductCatalog }}"
+                  wx:key="id"
+                  class="exchange-drawer__product-tab {{ exchangeDrawerProductId === item.id ? 'is-active' : '' }}"
+                  data-product-id="{{ item.id }}"
+                  bindtap="selectExchangeDrawerProduct"
+                >
+                  <image class="exchange-drawer__product-thumb" src="{{ item.img }}" mode="aspectFill" />
+                  <text class="exchange-drawer__product-name">{{ item.title }}</text>
+                </view>
+                <view wx:if="{{ !filteredProductCatalog.length }}" class="exchange-drawer__product-empty">该分类下暂无可换商品</view>
+              </view>
+            </scroll-view>
+
+            <view wx:if="{{ exchangeDrawerPackagesLoading }}" class="exchange-drawer__state">规格加载中...</view>
+            <scroll-view wx:else scroll-y class="exchange-drawer__package-list">
+              <view
+                wx:for="{{ exchangeDrawerPackages }}"
+                wx:key="id"
+                class="exchange-package {{ exchangeDrawerPackageId === item.id ? 'is-active' : '' }} {{ item.disabled || item.stock <= 0 ? 'is-disabled' : '' }}"
+                data-package-id="{{ item.id }}"
+                bindtap="selectExchangeDrawerPackage"
+              >
+                <view
+                  class="exchange-package__thumb"
+                  catchtap="previewExchangePackageImages"
+                  data-package-id="{{ item.id }}"
+                  data-current="{{ item.thumbUrl || exchangeDrawerProductImg }}"
+                >
+                  <image class="exchange-package__thumb-image" src="{{ item.thumbUrl || exchangeDrawerProductImg }}" mode="aspectFill" />
+                </view>
+                <view class="exchange-package__body">
+                  <text class="exchange-package__name">{{ item.label }}</text>
+                  <view class="exchange-package__meta">
+                    <text class="exchange-package__price">¥{{ item.priceText }}</text>
+                    <text class="exchange-package__stock">库存 {{ item.stock }}</text>
+                  </view>
+                  <text wx:if="{{ item.disabled }}" class="exchange-package__note">不可选择原商品原套餐</text>
+                  <text wx:elif="{{ item.stock <= 0 }}" class="exchange-package__note">当前规格缺货</text>
+                </view>
+                <view class="exchange-package__check {{ exchangeDrawerPackageId === item.id ? 'is-checked' : '' }}">
+                  <van-icon wx:if="{{ exchangeDrawerPackageId === item.id }}" name="success" size="14px" color="#fff" />
+                </view>
+              </view>
+            </scroll-view>
+
+            <view class="exchange-drawer__qty-row">
+              <text class="exchange-drawer__qty-label">更换数量</text>
+              <view class="stepper">
+                <view class="stepper__btn" data-delta="-1" bindtap="changeExchangeDrawerQuantity">-</view>
+                <text class="stepper__val">{{ exchangeDrawerQuantity }}</text>
+                <view class="stepper__btn" data-delta="1" bindtap="changeExchangeDrawerQuantity">+</view>
+              </view>
+            </view>
+          </block>
+          <view wx:else class="exchange-drawer__state">暂无可更换商品</view>
+        </block>
+
+        <view wx:if="{{ exchangeDrawerExistingSelection }}" class="exchange-drawer__toolbar">
+          <text class="exchange-drawer__clear" bindtap="clearExchangeDrawerSelection">清除已选更换商品</text>
+        </view>
+
+        <view class="drawer__footer">
+          <button class="drawer__btn-cancel" bindtap="closeExchangeDrawer">取消</button>
+          <button class="drawer__btn-confirm" bindtap="confirmExchangeDrawer">{{ exchangeDrawerExistingSelection ? '更新选择' : '确认选择' }}</button>
+        </view>
+      </view>
+    </van-popup>
+  </block>
+</view>

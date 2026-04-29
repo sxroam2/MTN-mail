@@ -1,0 +1,61 @@
+<!-- pages/equipment/equipment.wxml -->
+<view class="page">
+  <!-- 提示文字 - 只在蓝牙未开启时显示 -->
+  <view class="tip" wx:if="{{!bluetoothEnabled}}">请开启手机蓝牙</view>
+  
+  <!-- 波纹容器 - 蓝牙开启时缩小并上移，蓝牙关闭时居中 -->
+  <view class="ripple-container {{bluetoothEnabled ? 'small' : ''}}">
+    <!-- 波纹层 - 只在蓝牙开启时显示波纹动画 -->
+    <block wx:if="{{bluetoothEnabled}}">
+      <view class="ripple ripple-1"></view>
+      <view class="ripple ripple-2"></view>
+      <view class="ripple ripple-3"></view>
+    </block>
+    
+    <!-- 中心按钮 -->
+    <view class="box" bindtap="handleButtonClick">
+      <view class="main">
+        <image class="image" src="/assets/phone.png" mode="aspectFit" />
+        <view class="text">
+          <block wx:if="{{!bluetoothEnabled}}">搜索设备</block>
+          <block wx:else>{{isSearching ? '搜索中' : '搜索设备'}}</block>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 设备列表 - 蓝牙开启时显示，位于按钮下方 -->
+  <view class="device-section" wx:if="{{bluetoothEnabled}}">
+    <view class="device-header">
+      <text class="device-count" wx:if="{{isSearching && deviceList.length === 0}}">正在搜索设备...</text>
+      <text class="device-count" wx:if="{{isSearching && deviceList.length > 0}}">搜索到 {{deviceList.length}} 个设备</text>
+      <text class="device-count" wx:if="{{!isSearching && deviceList.length > 0}}">找到 {{deviceList.length}} 个设备</text>
+      <view class="device-actions">
+        <van-button size="small" plain custom-class="action-btn" bindtap="stopSearch" wx:if="{{isSearching}}">停止</van-button>
+        <van-button size="small" plain custom-class="action-btn" bindtap="restartSearch" wx:if="{{!isSearching && deviceList.length > 0}}">刷新</van-button>
+      </view>
+    </view>
+    
+    <scroll-view class="device-list" scroll-y enhanced show-scrollbar="{{false}}" scroll-with-animation>
+      <view wx:for="{{deviceList}}" wx:key="deviceId" 
+            class="device-item" 
+            bindtap="connectToDevice" data-device="{{item}}">
+        <view class="device-info">
+          <view class="device-name-row">
+            <text class="device-name">{{item.name || '未知设备'}}</text>
+          </view>
+          <text class="device-id">{{item.deviceId}}</text>
+        </view>
+        <view class="device-signal">
+          <text class="rssi">{{item.RSSI}} dBm</text>
+        </view>
+      </view>
+      
+      <!-- 空状态显示 -->
+      <view class="empty-state" wx:if="{{isSearching && deviceList.length === 0}}">
+        <van-icon name="scan" size="48" color="#ff6a45" />
+        <text>正在搜索附近的设备...</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>

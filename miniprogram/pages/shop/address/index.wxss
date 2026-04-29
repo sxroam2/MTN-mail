@@ -1,0 +1,155 @@
+.page {
+  position: static !important;
+  min-height: 100vh;
+  background: #000;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 140rpx);
+}
+
+.page-loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  background: #000;
+  z-index: 10;
+}
+
+.empty-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 24rpx;
+  padding: 120rpx 36rpx;
+  gap: 20rpx;
+  border-radius: 32rpx;
+  background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+  outline: 1rpx solid rgba(89, 65, 59, 0.15);
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #fff;
+}
+
+.empty-subtext {
+  width: 460rpx;
+  text-align: center;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #999;
+}
+
+.address-list {
+  padding: 24rpx 24rpx 24rpx;
+}
+
+.address-card {
+  background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+  border-radius: 24rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  outline: 1rpx solid rgba(89, 65, 59, 0.15);
+}
+
+.address-card.selectable:active {
+  outline: 1rpx solid #ff6a45;
+}
+
+.addr-main {
+  margin-bottom: 20rpx;
+}
+
+.addr-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 10rpx;
+}
+
+.addr-person {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.addr-name {
+  font-size: 30rpx;
+  color: #fff;
+  font-weight: 500;
+}
+
+.addr-phone {
+  font-size: 26rpx;
+  color: #aaa;
+}
+
+.tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10rpx;
+}
+
+.label-tag,
+.default-tag {
+  font-size: 20rpx;
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+}
+
+.label-tag {
+  color: #ccc;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.default-tag {
+  color: #ff6a45;
+  background: rgba(255, 106, 69, 0.12);
+}
+
+.addr-detail {
+  font-size: 24rpx;
+  color: #ccc;
+  line-height: 1.5;
+}
+
+.addr-actions {
+  display: flex;
+  gap: 40rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.action-text {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.add-btn-wrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx 24rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(10, 10, 10, 0.82);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+
+.add-btn-shell {
+  padding: 12rpx;
+  border-radius: 28rpx;
+  background: rgba(26, 26, 26, 0.96);
+}

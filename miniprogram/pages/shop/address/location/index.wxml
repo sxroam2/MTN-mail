@@ -1,0 +1,62 @@
+<view class="page">
+  <view class="top-overlay">
+    <view class="search-bar">
+      <view class="search-region" bindtap="openCityPicker">
+        <text class="region-text">{{ (currentCity && currentCity.name) || selectedLocation.city || selectedLocation.province || '城市' }}</text>
+        <view class="region-arrow"></view>
+      </view>
+      <view class="search-divider"></view>
+      <input class="search-input" placeholder="请输入您的收货地址" placeholder-class="search-placeholder" value="{{ keyword }}" bindinput="onKeywordInput" confirm-type="search" bindconfirm="searchSuggestions" />
+    </view>
+  </view>
+
+  <map
+    id="locationMap"
+    class="picker-map"
+    latitude="{{ latitude }}"
+    longitude="{{ longitude }}"
+    scale="{{ scale }}"
+    markers="{{ markers }}"
+    bindregionchange="onMapRegionChange"
+  ></map>
+
+  <view class="center-pin">
+    <view class="pin-dot"></view>
+    <view class="pin-shadow"></view>
+  </view>
+
+  <view class="locate-fab" bindtap="locateCurrentPosition" style="bottom: {{ locateFabBottomPx }}px;">
+    <text class="locate-fab-icon">⌖</text>
+  </view>
+
+  <view class="sheet" style="height: {{ sheetHeightPx }}px;">
+    <view class="sheet-drag-zone" catchtouchstart="onSheetDragStart" catchtouchmove="onSheetDragMove" catchtouchend="onSheetDragEnd" catchtouchcancel="onSheetDragEnd">
+      <view class="sheet-handle"></view>
+      <view class="sheet-title-row">
+        <text class="sheet-title">附近位置</text>
+      </view>
+    </view>
+
+    <view wx:if="{{ serviceUnavailable }}" class="service-banner">
+      <text class="service-title">当前已切换到手动地址模式</text>
+      <text class="service-desc">{{ serviceMessage }}</text>
+    </view>
+
+    <scroll-view scroll-y class="poi-scroll">
+      <view wx:if="{{ !poiList.length }}" class="empty-poi">{{ poiEmptyMessage }}</view>
+      <view wx:for="{{ poiList }}" wx:key="key" class="poi-item" bindtap="selectPoi" data-index="{{ index }}">
+        <view class="poi-icon">
+          <image class="locate-icon" src="/assets/icons/location-pin.svg" mode="aspectFit" />
+        </view>
+        <view class="poi-copy">
+          <text class="poi-name {{ item.key === selectedPoiKey ? 'poi-name-active' : '' }}">{{ item.title }}</text>
+          <text class="poi-address {{ item.key === selectedPoiKey ? 'poi-address-active' : '' }}">{{ item.address || (item.province + item.city + item.district) }}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="sheet-footer">
+      <van-button round block color="linear-gradient(90deg, #ff6a45, #ff4d4f)" bindtap="confirmLocation">确认此位置</van-button>
+    </view>
+  </view>
+</view>

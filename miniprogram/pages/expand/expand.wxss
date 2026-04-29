@@ -1,0 +1,202 @@
+/* pages/expand/expand.wxss */
+.page {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 40rpx;
+}
+
+/* 主要内容 */
+.content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(26, 26, 26, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 48rpx;
+  padding: 60rpx 40rpx;
+  border: 1px solid rgba(255, 106, 69, 0.2);
+  box-shadow: 0 20rpx 40rpx rgba(0, 0, 0, 0.5);
+}
+
+/* 图标容器 */
+.icon-container {
+  margin-bottom: 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.icon-wrapper {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+  border: 2px solid #ff6a45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30rpx;
+  animation: pulse 2s infinite;
+}
+
+/* 加载动画点 */
+.loading-dots {
+  display: flex;
+  gap: 12rpx;
+}
+
+.dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background-color: #ff6a45;
+  animation: dotPulse 1.5s infinite ease-in-out;
+}
+
+.dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* 标题 */
+.title {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #ff6a45;
+  margin-bottom: 20rpx;
+  text-shadow: 0 0 20px rgba(255, 106, 69, 0.3);
+}
+
+/* 描述 */
+.description {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 40rpx;
+}
+
+.description text {
+  font-size: 28rpx;
+  color: #999;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* 进度条 */
+.progress-container {
+  width: 100%;
+  margin-bottom: 30rpx;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8rpx;
+  background: #2a2a2a;
+  border-radius: 4rpx;
+  overflow: hidden;
+  margin-bottom: 12rpx;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6a45, #ff4d4f);
+  border-radius: 4rpx;
+  animation: progressShine 2s infinite;
+}
+
+.progress-text {
+  font-size: 24rpx;
+  color: #ff6a45;
+  display: block;
+  text-align: right;
+}
+
+/* 预计上线时间 */
+.estimate {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 60rpx;
+  padding: 16rpx 30rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 40rpx;
+}
+
+.estimate text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 返回按钮 */
+.back-btn {
+  width: 100%;
+}
+
+.back-button {
+  background-color: #ff6a45 !important;
+  border: none !important;
+  height: 88rpx !important;
+  line-height: 88rpx !important;
+  font-size: 28rpx !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  border-radius: 44rpx !important;
+}
+
+.back-button:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+/* 动画 */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(5, 30, 247, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 20rpx rgba(255, 117, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 117, 0, 0);
+  }
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+    background-color: #1826e9;
+  }
+}
+
+@keyframes progressShine {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+  }
+}

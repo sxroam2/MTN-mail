@@ -1,0 +1,41 @@
+<!-- pages/expand/expand.wxml -->
+<view class="page">
+  <!-- 背景装饰 -->
+  <view class="bg-decoration">
+    <view class="bg-circle"></view>
+    <view class="bg-circle"></view>
+    <view class="bg-circle"></view>
+  </view>
+
+  <!-- 主要内容 -->
+  <view class="content">
+    <!-- 图标动画 -->
+    <view class="icon-container">
+      <view class="icon-wrapper">
+        <van-icon name="pending" size="80" color="#0089ff" />
+      </view>
+      <view class="loading-dots">
+        <view class="dot"></view>
+        <view class="dot"></view>
+        <view class="dot"></view>
+      </view>
+    </view>
+
+    <!-- 标题 -->
+    <view class="title">功能开发中</view>
+
+    <!-- 描述 -->
+    <view class="description">
+      <text>该功能正在紧锣密鼓地开发中</text>
+      <text>敬请期待...</text>
+    </view>
+
+    <!-- 进度条（可选，增加动感） -->
+    <view class="progress-container">
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: 50%;"></view>
+      </view>
+      <text class="progress-text">开发进度 50%</text>
+    </view>
+  </view>
+</view>

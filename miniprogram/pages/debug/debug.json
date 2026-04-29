@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "蓝牙调试",
+  "usingComponents": {
+    "Bluetooth": "/components/BluetoothCom/BluetoothCom"
+  }
+}

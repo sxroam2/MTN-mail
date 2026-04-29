@@ -1,0 +1,217 @@
+<view class="page">
+  <view class="order-search-shell">
+    <view class="order-search">
+      <van-icon name="search" size="18px" color="#6f6f6f" />
+      <input
+        class="order-search__input"
+        value="{{ searchKeyword }}"
+        placeholder="搜索订单号/商品名"
+        placeholder-class="order-search__placeholder"
+        confirm-type="search"
+        bindinput="onSearchInput"
+        bindconfirm="doSearch"
+      />
+      <view wx:if="{{ searchKeyword }}" class="order-search__clear" bindtap="clearSearchInput">
+        <van-icon name="clear" size="18px" color="#6f6f6f" />
+      </view>
+    </view>
+  </view>
+  <view class="order-tabs-shell">
+    <van-tabs
+      custom-class="order-tabs"
+      active="{{ activeTab }}"
+      bind:change="onTabChange"
+      color="#ff6a45"
+      title-active-color="#ffffff"
+      title-inactive-color="#8c8c8c"
+      line-width="40rpx"
+      background="transparent"
+      ellipsis="{{ false }}"
+      swipe-threshold="6"
+    >
+      <van-tab wx:for="{{ tabs }}" wx:key="status" title="{{ item.title }}"></van-tab>
+    </van-tabs>
+  </view>
+
+  <van-loading wx:if="{{ pageLoading }}" size="36px" color="#ff6a45" vertical class="page-loading">加载中...</van-loading>
+
+  <view wx:else class="order-list-shell">
+    <view wx:if="{{ listLoading }}" class="list-state">
+      <van-loading size="28px" color="#ff6a45" vertical>订单加载中...</van-loading>
+    </view>
+
+    <view wx:elif="{{ isEmpty }}" class="empty-wrap">
+      <view class="empty-card">
+        <van-icon name="orders-o" size="72px" color="#4a4a4a" />
+        <text class="empty-title">{{ appliedKeyword ? '没有找到相关订单' : '还没有相关订单' }}</text>
+        <text class="empty-text">{{ appliedKeyword ? '换个订单号或商品名试试。' : '逛遍好物遇见心动，属于你的美好都会如约而至。' }}</text>
+        <van-button wx:if="{{ !appliedKeyword }}" round type="primary" color="linear-gradient(90deg, #ff6a45, #ff4d4f)" size="small" bindtap="goShopping">去逛逛</van-button>
+      </view>
+    </view>
+
+    <view wx:else class="order-list">
+      <view
+        wx:for="{{ orders }}"
+        wx:key="orderNo"
+        class="order-card"
+        bindtap="goDetail"
+        data-no="{{ item.orderNo }}"
+        hover-class="order-card--hover"
+      >
+        <view class="order-card__header">
+          <view class="order-card__header-main">
+            <text class="order-card__number">{{ item.orderNo }}</text>
+            <text class="order-card__time">{{ item.createTimeText }}</text>
+          </view>
+          <text class="order-card__status status-tone-{{ item.statusTone }}">{{ item.statusText }}</text>
+        </view>
+
+        <view wx:if="{{ item.showCountdown }}" class="order-card__countdown">
+          <text class="order-card__countdown-label">剩余支付时间</text>
+          <text class="order-card__countdown-value">{{ item.countdownText }}</text>
+        </view>
+
+        <view class="order-card__items">
+          <view
+            wx:for="{{ item.visibleItems }}"
+            wx:key="key"
+            wx:for-item="product"
+            wx:for-index="productIndex"
+            class="order-card__product {{ productIndex > 0 ? 'order-card__product--stacked' : '' }}"
+          >
+            <view class="order-card__thumb-wrap">
+              <van-image
+                wx:if="{{ product.imageUrl }}"
+                class="order-card__thumb"
+                width="132rpx"
+                height="132rpx"
+                src="{{ product.imageUrl }}"
+                fit="cover"
+                radius="20rpx"
+              />
+              <view wx:else class="order-card__thumb-fallback">
+                <van-icon name="photo-o" size="32px" color="#555" />
+              </view>
+            </view>
+            <view class="order-card__product-main">
+              <view class="order-card__product-top">
+                <text class="order-card__product-name">{{ product.productName }}</text>
+                <view class="order-card__price">
+                  <text class="order-card__price-value">¥{{ product.priceText }}</text>
+                </view>
+              </view>
+              <view class="order-card__package-row">
+                <text wx:if="{{ product.packageName }}" class="order-card__package-name">{{ product.packageName }}</text>
+                <text class="order-card__price-count">x{{ product.quantity }}</text>
+              </view>
+              <text wx:if="{{ product.packageDescription }}" class="order-card__product-sub">{{ product.packageDescription }}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="order-card__footer">
+          <view
+            class="order-card__summary {{ item.displayItemCount > 1 ? 'order-card__summary--toggleable' : '' }}"
+            catchtap="handleSummaryTap"
+            data-no="{{ item.orderNo }}"
+            data-count="{{ item.displayItemCount }}"
+          >
+            <view class="order-card__summary-left">
+              <view wx:if="{{ item.displayItemCount > 1 }}" class="order-card__toggle">
+                <text class="order-card__summary-count">{{ item.isExpanded ? '收起' : '共' + item.displayItemCount + '件' }}</text>
+                <van-icon name="{{ item.isExpanded ? 'arrow-up' : 'arrow-down' }}" size="14px" color="#9a9a9a" />
+              </view>
+              <text wx:else class="order-card__summary-count">共{{ item.displayItemCount }}件</text>
+            </view>
+            <view class="order-card__summary-pay">
+              <text class="order-card__summary-pay-label">实付</text>
+              <text class="order-card__summary-pay-value">¥{{ item.payAmountText }}</text>
+            </view>
+          </view>
+
+          <view wx:if="{{ item.canCancel || item.canPay || item.canConfirm || item.canDelete || item.canBuyAgain || item.canTrack }}" class="order-card__actions" catchtap="noop">
+            <van-button
+              wx:if="{{ item.canCancel }}"
+              plain
+              round
+              size="small"
+              color="#8a8a8a"
+              custom-class="order-action-btn order-action-btn--subtle"
+              data-no="{{ item.orderNo }}"
+              catchtap="cancelOrder"
+            >
+              取消支付
+            </van-button>
+            <van-button
+              wx:if="{{ item.canDelete }}"
+              plain
+              round
+              size="small"
+              color="#8a8a8a"
+              custom-class="order-action-btn order-action-btn--subtle"
+              data-no="{{ item.orderNo }}"
+              catchtap="deleteOrder"
+            >
+              删除订单
+            </van-button>
+            <van-button
+              wx:if="{{ item.canTrack }}"
+              plain
+              round
+              size="small"
+              color="#ff6a45"
+              custom-class="order-action-btn order-action-btn--ghost"
+              data-no="{{ item.orderNo }}"
+              catchtap="goLogistics"
+            >
+              查看物流
+            </van-button>
+            <van-button
+              wx:if="{{ item.canBuyAgain }}"
+              plain
+              round
+              size="small"
+              color="#ff4d4f"
+              custom-class="order-action-btn order-action-btn--ghost"
+              data-no="{{ item.orderNo }}"
+              catchtap="buyAgain"
+            >
+              再来一单
+            </van-button>
+            <van-button
+              wx:if="{{ item.canConfirm }}"
+              round
+              size="small"
+              color="linear-gradient(90deg, #ff6a45, #ff4d4f)"
+              custom-class="order-action-btn order-action-btn--primary"
+              data-no="{{ item.orderNo }}"
+              catchtap="confirmReceipt"
+            >
+              确认收货
+            </van-button>
+            <van-button
+              wx:if="{{ item.canPay }}"
+              round
+              size="small"
+              color="linear-gradient(90deg, #ff6a45, #ff4d4f)"
+              custom-class="order-action-btn order-action-btn--primary"
+              data-no="{{ item.orderNo }}"
+              catchtap="payOrder"
+            >
+              去支付
+            </van-button>
+          </view>
+        </view>
+      </view>
+
+      <van-loading wx:if="{{ loadingMore }}" size="24px" color="#ff6a45" class="list-loading" />
+      <view wx:if="{{ !hasMore && orders.length > 0 }}" class="no-more">已经到底了</view>
+    </view>
+  </view>
+
+  <order-cancel-sheet
+    show="{{ showCancelPopup }}"
+    bind:close="onCancelPopupClose"
+    bind:confirm="confirmCancel"
+  />
+</view>

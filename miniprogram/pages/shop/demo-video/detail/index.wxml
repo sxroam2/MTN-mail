@@ -1,0 +1,93 @@
+<view class="detail-page">
+  <view wx:if="{{ loading }}" class="page-loading">
+    <van-loading size="36px" color="#ff6a45" vertical>加载中...</van-loading>
+  </view>
+
+  <block wx:elif="{{ currentVideo }}">
+    <!-- 播放器全宽区域 -->
+    <view class="player-shell">
+      <view wx:if="{{ currentVideoUrl }}" class="video-wrap">
+        <video
+          id="demoVideoPlayer"
+          class="video-player"
+          src="{{ currentVideoUrl }}"
+          poster="{{ currentVideo.coverUrl }}"
+          controls
+          autoplay
+          object-fit="contain"
+          title="{{ currentVideo.title }}"
+          show-center-play-btn
+          show-play-btn
+          show-fullscreen-btn
+          enable-play-gesture
+          vslide-gesture-in-fullscreen
+          auto-pause-if-navigate
+          auto-pause-if-open-native
+        ></video>
+      </view>
+      <view wx:else class="video-empty">
+        <van-icon name="warning-o" size="44px" color="#ff6a45" />
+        <text class="empty-title">{{ emptyMessage }}</text>
+        <text class="empty-desc">请在官网后台为当前视频配置可直接播放的视频地址</text>
+      </view>
+    </view>
+
+    <!-- 标题 + 标签信息 -->
+    <view class="info-card">
+      <text class="video-title">{{ currentVideo.title }}</text>
+
+      <view class="meta-row">
+        <text wx:if="{{ currentCategory }}" class="meta-tag">{{ currentCategory }}</text>
+        <text wx:if="{{ currentModel }}" class="meta-tag">{{ currentModel }}</text>
+      </view>
+
+      <text wx:if="{{ currentVideo.description }}" class="video-desc">{{ currentVideo.description }}</text>
+    </view>
+
+    <!-- 相关视频 -->
+    <view wx:if="{{ relatedVideos.length > 0 }}" class="section-card">
+      <view class="section-header">
+        <text class="section-title">更多演示视频</text>
+        <text class="section-subtitle">同型号系列</text>
+      </view>
+
+      <view class="related-list">
+        <view
+          wx:for="{{ relatedVideos }}"
+          wx:key="itemKey"
+          class="related-item"
+          bindtap="onSelectVideo"
+          data-key="{{ item.itemKey }}"
+          hover-class="related-item-hover"
+        >
+          <view class="related-thumb-wrap">
+            <image wx:if="{{ item.displayCoverUrl }}" class="related-thumb" src="{{ item.displayCoverUrl }}" mode="aspectFill" lazy-load />
+            <view wx:else class="related-thumb related-thumb-placeholder">
+              <van-icon name="photo-o" size="20px" color="#ff6a45" />
+            </view>
+            <view class="related-thumb-mask"></view>
+            <view class="related-thumb-play">
+              <van-icon name="play-circle-o" size="18px" color="#ffffff" />
+            </view>
+            <text wx:if="{{ item.duration }}" class="related-duration">{{ item.duration }}</text>
+          </view>
+
+          <view class="related-info">
+            <text class="related-title">{{ item.title }}</text>
+            <text wx:if="{{ item.displayDescription }}" class="related-desc">{{ item.displayDescription }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 视频未找到 -->
+  <view wx:else class="video-empty-page">
+    <van-icon name="warning-o" size="52px" color="#ff6a45" />
+    <text class="empty-title">{{ emptyMessage || '未找到对应视频' }}</text>
+    <view class="empty-actions">
+      <button class="ghost-btn" bindtap="onBack">返回列表</button>
+      <button class="primary-btn" bindtap="onRetry">重新加载</button>
+    </view>
+  </view>
+</view>

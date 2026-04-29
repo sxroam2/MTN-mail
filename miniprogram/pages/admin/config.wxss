@@ -1,0 +1,319 @@
+/* pages/admin/config.wxss */
+.config-page {
+  min-height: 100vh;
+  background: #0a0a0a;
+}
+
+/* 头部 */
+.config-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background: #0089ff;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* 标签页 */
+.config-tabs {
+  display: flex;
+  background: #1a1a1a;
+  padding: 20rpx;
+  gap: 20rpx;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.config-tabs .tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 14px;
+  color: #999;
+  border-radius: 40rpx;
+  transition: all 0.3s ease;
+}
+
+.config-tabs .tab-item.active {
+  background: #0089ff;
+  color: #fff;
+}
+
+/* 内容区域 */
+.tab-content {
+  padding: 20rpx;
+}
+
+/* 配置卡片 */
+.config-card {
+  background: #1a1a1a;
+  border-radius: 24rpx;
+  margin-bottom: 20rpx;
+  padding: 30rpx;
+}
+
+.card-header {
+  margin-bottom: 20rpx;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.card-content {
+  padding: 10rpx 0;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.config-input {
+  flex: 1;
+  background: #333;
+  border: none;
+  border-radius: 40rpx;
+  padding: 20rpx 30rpx;
+  color: #fff;
+  font-size: 14px;
+}
+
+.save-btn {
+  background: #0089ff !important;
+  border: none !important;
+  color: #fff !important;
+  height: 64rpx !important;
+  line-height: 64rpx !important;
+  border-radius: 32rpx !important;
+  padding: 0 30rpx !important;
+}
+
+/* 图片预览 */
+.image-preview {
+  width: 120rpx;
+  height: 120rpx;
+  background: #333;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+}
+
+.image-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.action-btn {
+  flex: 1;
+  height: 64rpx !important;
+  line-height: 64rpx !important;
+  border-radius: 32rpx !important;
+  font-size: 13px !important;
+}
+
+.action-btn:first-child {
+  background: #0089ff !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.action-btn:last-child {
+  background: transparent !important;
+  border: 1px solid #666 !important;
+  color: #999 !important;
+}
+
+/* 添加按钮 */
+.add-btn-wrapper {
+  padding: 20rpx 0;
+}
+
+.add-carousel-btn {
+  background: #0089ff !important;
+  border: none !important;
+  color: #fff !important;
+  width: 100% !important;
+  height: 80rpx !important;
+  line-height: 80rpx !important;
+  border-radius: 40rpx !important;
+  font-size: 14px !important;
+}
+
+/* 轮播图列表 */
+.carousel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.carousel-item {
+  background: #1a1a1a;
+  border-radius: 24rpx;
+  padding: 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  position: relative;
+}
+
+.carousel-index {
+  width: 40rpx;
+  height: 40rpx;
+  background: #333;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+}
+
+.carousel-preview {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 16rpx;
+  background: #333;
+}
+
+.carousel-info {
+  flex: 1;
+}
+
+.carousel-model {
+  font-size: 14px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.carousel-actions {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.move-buttons {
+  display: flex;
+  gap: 10rpx;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 20rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 0;
+  background: #1a1a1a;
+  border-radius: 24rpx;
+}
+
+.empty-text {
+  margin-top: 20rpx;
+  font-size: 14px;
+  color: #666;
+}
+
+/* 图片选择器 */
+.image-selector {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 10rpx 20rpx;
+  background: #333;
+  border-radius: 32rpx;
+  color: #FF7500;
+  font-size: 13px;
+}
+
+.selected-image {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 12rpx;
+}
+
+/* 弹窗样式 */
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx 30rpx 20rpx;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.popup-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.popup-content {
+  padding: 30rpx;
+}
+
+.popup-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.popup-item-left {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  flex: 1;
+}
+
+.popup-item-left>text{
+  color: #0089ff;
+  display: flex;
+  margin-top: -10rpx;
+}
+
+.popup-avatar {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 8rpx;
+}
+
+.popup-item-right {
+  display: flex;
+  align-items: center;
+}
+
+.placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30rpx;
+}
+
+.confirm-btn {
+  background: #0089ff !important;
+  border: none !important;
+  color: #fff !important;
+  height: 72rpx !important;
+  line-height: 72rpx !important;
+  border-radius: 36rpx !important;
+  padding: 0 40rpx !important;
+  min-width: 160rpx;
+}

@@ -1,0 +1,169 @@
+<view class="bluetooth-container">
+  <view wx:if="{{showHeader}}" class="header">
+    <view>
+      <view class="title">实时蓝牙连接</view>
+      <text class="status-summary">按后台生效协议扫描设备、接收数据并记录日志。</text>
+    </view>
+    <van-tag size="large" custom-class="status-tag" custom-style="background-color: {{ bluetoothAdapter ? '#ff6a45' : '#4b5563' }}; border: none; color: white;">
+      {{ bluetoothAdapter ? '蓝牙已开启' : '蓝牙未开启' }}
+    </van-tag>
+  </view>
+
+  <view wx:if="{{!connectedDevice}}" class="action-bar">
+    <van-button type="primary" block loading="{{ isSearching }}" loading-text="搜索中..." bind:click="initializeBluetooth" custom-style="background-color: #ff6a45; border-color: #ff6a45; color: #ffffff;">
+      <view class="btn-content" wx:if="{{ !isSearching }}">
+        <text>搜索设备</text>
+      </view>
+    </van-button>
+
+    <van-button plain type="primary" block disabled="{{ !isSearching }}" bind:click="stopBluetoothSearch" custom-style="border-color: #ff6a45; color: #ff6a45; background: transparent;">
+      停止搜索
+    </van-button>
+  </view>
+
+  <view wx:if="{{connectedDevice}}" class="connection-box surface-card">
+    <view class="section-header">
+      <view class="connection-main">
+        <text>当前已连接设备</text>
+        <text class="hint">调试期间已隐藏搜索设备卡，如需切换设备请先断开。</text>
+      </view>
+      <van-button plain type="danger" size="small" bind:click="disconnectDevice" custom-style="border-color: #ff6a45; color: #ff6a45; background: transparent;">
+        断开设备
+      </van-button>
+    </view>
+
+    <view class="device-item connected device-item-static">
+      <view class="device-info">
+        <text class="device-name">{{ connectedDevice.name }}</text>
+        <text class="device-id">{{ connectedDevice.deviceId }}</text>
+      </view>
+      <view class="device-status">
+        <van-tag plain type="primary" custom-style="border-color: #ff6a45; color: #ff6a45; background: transparent;">
+          已连接
+        </van-tag>
+        <van-icon name="link" color="#ff6a45" />
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{!connectedDevice}}" class="device-box surface-card">
+    <view class="section-header">
+      <text>发现的设备 ({{ deviceList.length }})</text>
+      <text class="hint">点击设备即可连接</text>
+    </view>
+
+    <scroll-view class="device-list" scroll-y enhanced show-scrollbar="{{false}}" scroll-with-animation>
+      <view wx:for="{{ deviceList }}" wx:key="deviceId" class="device-item {{ item.connected ? 'connected' : '' }}" bindtap="connectToDevice" data-device="{{ item }}">
+        <view class="device-info">
+          <text class="device-name">{{ item.name }}</text>
+          <text class="device-id">{{ item.deviceId }}</text>
+        </view>
+        <view class="device-status">
+          <van-tag plain type="primary" custom-style="border-color: #ff6a45; color: #ff6a45; background: transparent;">
+            {{ item.RSSI }} dBm
+          </van-tag>
+          <van-icon name="{{ item.connected ? 'link' : 'bluetooth' }}" color="{{ item.connected ? '#ff6a45' : '#9ca3af' }}" />
+        </view>
+      </view>
+
+      <van-empty wx:if="{{ deviceList.length === 0 }}" description="暂无设备" />
+    </scroll-view>
+  </view>
+
+  <view class="receive-box surface-card" wx:if="{{ connectedDevice }}">
+    <view class="section-header">
+      <text>来自 {{ connectedDevice.name }} 的数据</text>
+      <view class="receive-actions">
+        <van-tag plain type="primary" custom-style="border-color: #ff6a45; color: #ff6a45; background: transparent; margin-right: 8px;">
+          {{ messages.length }} 条
+        </van-tag>
+        <van-icon name="delete" color="#9ca3af" size="18" bind:click="clearMessages" />
+      </view>
+    </view>
+
+    <scroll-view class="message-list" scroll-y scroll-into-view="{{ lastMessageId }}" enhanced>
+      <view wx:for="{{ messages }}" wx:key="index" class="message-item" id="msg-{{ index }}">
+        <view class="message-header">
+          <van-tag plain type="primary" size="mini" custom-style="border-color: #ff6a45; color: #ff6a45; background: transparent;">
+            {{ item.time }}
+          </van-tag>
+          <text class="message-type">接收</text>
+        </view>
+        <view class="message-content">
+          <view class="data-row full-frame">
+            <text class="data-label">完整数据帧</text>
+            <text class="data-value frame-value">{{ item.rawHex }}</text>
+          </view>
+
+          <view class="frame-structure">
+            <view class="data-row">
+              <text class="data-label">帧头</text>
+              <text class="data-value">0x{{ item.parsed.header }}</text>
+            </view>
+            <view class="data-row">
+              <text class="data-label">CMD</text>
+              <text class="data-value">0x{{ item.parsed.cmd }}</text>
+              <text class="cmd-desc" wx:if="{{ item.parsed.description }}">{{ item.parsed.description }}</text>
+            </view>
+            <view class="data-row">
+              <text class="data-label">方向</text>
+              <text class="data-value">{{ item.parsed.direction }}</text>
+            </view>
+            <view class="data-row">
+              <text class="data-label">参数长度</text>
+              <text class="data-value">{{ item.parsed.paramLength }}</text>
+            </view>
+            <view class="data-row">
+              <text class="data-label">参数</text>
+              <text class="data-value">{{ item.parsed.params }}</text>
+            </view>
+
+            <view class="data-row" wx:if="{{ item.parsed.parsedValue !== null || item.parsed.parsedText }}">
+              <text class="data-label">解析值</text>
+              <text class="data-value parsed-value">
+                <text wx:if="{{ item.parsed.parsedText }}">{{ item.parsed.parsedText }}</text>
+                <text wx:if="{{ item.parsed.parsedValue !== null && !item.parsed.parsedText }}">{{ item.parsed.parsedValue }}</text>
+                <text wx:if="{{ item.parsed.unit }}"> {{ item.parsed.unit }}</text>
+              </text>
+            </view>
+
+            <view class="data-row" wx:if="{{ item.parsed.isAck }}">
+              <text class="data-label">状态</text>
+              <van-tag type="success" size="mini">已收到回复帧</van-tag>
+            </view>
+
+            <view class="data-row checksum-row">
+              <text class="data-label">校验和</text>
+              <text class="data-value">0x{{ item.parsed.checksum }}</text>
+              <van-icon name="{{ item.parsed.checksumValid ? 'checked' : 'cross' }}" color="{{ item.parsed.checksumValid ? '#ff6a45' : '#ff4d4f' }}" size="16" />
+              <text class="checksum-desc" wx:if="{{ !item.parsed.checksumValid }}">
+                计算值 0x{{ item.parsed.calculatedChecksum }}
+              </text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="log-box surface-card">
+    <view class="section-header">
+      <text>系统日志</text>
+      <view class="log-actions">
+        <van-tag plain type="primary" custom-style="border-color: #ff6a45; color: #ff6a45; background: transparent; margin-right: 8px;">
+          {{ logs.length }} 条记录
+        </van-tag>
+        <van-icon name="delete" color="#9ca3af" size="18" bind:click="clearLogs" />
+      </view>
+    </view>
+
+    <scroll-view class="log-list" scroll-y enhanced>
+      <view wx:for="{{ logs }}" wx:key="index" class="log-item">
+        <van-tag plain type="primary" size="mini" custom-style="border-color: #ff6a45; color: #ff6a45; background: transparent; margin-right: 8px;">
+          {{ item.time }}
+        </van-tag>
+        <text class="log-text">{{ item.text }}</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>

@@ -1,0 +1,209 @@
+<!-- pages/profile/profile.wxml -->
+<view class="page">
+  <!-- 用户信息卡片 -->
+  <view wx:if="{{isLoggedIn}}" class="user-card" bindtap="showUserInfoDialog">
+    <view class="avatar-wrapper">
+      <image class="avatar" src="{{avatarUrl || '/assets/logo.png'}}" mode="aspectFill"></image>
+    </view>
+    <view class="user-info">
+      <text class="nickname">{{nickname || '微信用户'}}</text>
+      <text class="welcome">手机号：{{userPhone}}</text>
+    </view>
+  </view>
+
+  <!-- 未登录时的用户卡片，点击获取手机号 -->
+  <button wx:else class="user-card login-card-btn {{ phoneLoginPending ? 'login-card-btn-pending' : '' }}" open-type="getPhoneNumber|agreePrivacyAuthorization" bindgetphonenumber="onGetPhoneNumber" bindagreeprivacyauthorization="onAgreePrivacyAuthorization" loading="{{ phoneLoginPending }}" disabled="{{ phoneLoginPending }}">
+    <view class="avatar-wrapper">
+      <image class="avatar" src="{{avatarUrl || '/assets/logo.png'}}" mode="aspectFill"></image>
+    </view>
+    <view class="user-info">
+      <text class="nickname">{{nickname || '微信用户'}}</text>
+      <text class="welcome">点击登录 / 注册</text>
+    </view>
+    <van-icon name="arrow" size="16" color="#999" />
+  </button>
+
+  <view wx:if="{{!isLoggedIn && isMockLoginAvailable}}" class="section-card">
+    <view class="section-header">
+      <van-icon name="bug-o" size="20" color="#ff6a45" />
+      <text>开发调试</text>
+    </view>
+    <view class="login-area">
+      <button class="phone-login-btn" bindtap="onDevtoolsMockLogin">模拟登录 {{mockPhoneNumber}}</button>
+      <text class="login-tip">{{mockLoginTip}}</text>
+    </view>
+  </view>
+
+  <!-- 退出登录区域（仅登录后显示） -->
+  <view class="section-card" wx:if="{{isLoggedIn}}">
+    <view class="section-header">
+      <van-icon name="user-circle-o" size="20" color="#ff6a45" />
+      <text>已登录</text>
+    </view>
+    <view class="login-area">
+      <text class="login-tip" style="margin-bottom: 16rpx;">当前手机号：{{userPhone}}</text>
+      <button class="logout-btn" bindtap="onLogout">退出登录</button>
+    </view>
+  </view>
+
+  <!-- 商城快捷入口 -->
+  <view class="section-card">
+    <view class="section-header">
+      <van-icon name="shop-o" size="20" color="#ff6a45" />
+      <text>商城服务</text>
+    </view>
+    <view class="contact-list">
+      <view class="contact-item" bindtap="goToCart">
+        <view class="item-left">
+          <van-icon name="cart-o" size="16" color="#999" />
+          <text>我的购物车</text>
+        </view>
+        <view class="item-right">
+          <van-icon name="arrow" size="16" color="#999" />
+        </view>
+      </view>
+      <view class="contact-item" bindtap="goToOrders">
+        <view class="item-left">
+          <van-icon name="orders-o" size="16" color="#999" />
+          <text>我的订单</text>
+        </view>
+        <view class="item-right">
+          <van-icon name="arrow" size="16" color="#999" />
+        </view>
+      </view>
+      <view class="contact-item" bindtap="goToAddress">
+        <view class="item-left">
+          <van-icon name="location-o" size="16" color="#999" />
+          <text>收货地址</text>
+        </view>
+        <view class="item-right">
+          <van-icon name="arrow" size="16" color="#999" />
+        </view>
+      </view>
+      <view class="contact-item" bindtap="goToDemoVideo">
+        <view class="item-left">
+          <van-icon name="play-circle-o" size="16" color="#999" />
+          <text>演示视频</text>
+        </view>
+        <view class="item-right">
+          <van-icon name="arrow" size="16" color="#999" />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{showBluetoothDebugMenu}}" class="section-card">
+    <view class="section-header">
+      <van-icon name="setting-o" size="20" color="#ff6a45" />
+      <text>设备工具</text>
+    </view>
+    <view class="contact-list">
+      <view class="contact-item" bindtap="goToBluetoothDebug">
+        <view class="item-left">
+          <van-icon name="bulb-o" size="16" color="#999" />
+          <text>蓝牙调试</text>
+        </view>
+        <view class="item-right">
+          <text class="contact-value">已授权</text>
+          <van-icon name="arrow" size="16" color="#999" />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系客服卡片 -->
+  <button wx:if="{{isLoggedIn}}" class="section-card service-contact-btn" bindtap="openCustomerService">
+    <view class="section-header">
+      <van-icon name="service-o" size="20" color="#ff6a45" />
+      <text>联系客服</text>
+    </view>
+    <view class="service-content">
+      <text class="service-text">点击联系在线客服</text>
+      <van-icon name="arrow" size="16" color="#999" />
+    </view>
+  </button>
+
+  <!-- 关于我们卡片 -->
+  <view class="section-card">
+    <view class="section-header">
+      <van-icon name="info-o" size="20" color="#ff6a45" />
+      <text>关于我们</text>
+    </view>
+
+    <view class="contact-list">
+      <!-- 客服电话 - 点击拨号 -->
+      <view class="contact-item" bindtap="makePhoneCall" data-phone="{{ phone }}">
+        <view class="item-left">
+          <van-icon name="phone-o" size="16" color="#999" />
+          <text>客服电话</text>
+        </view>
+        <view class="item-right">
+          <text class="contact-value">{{ phone }}</text>
+          <van-icon name="arrow" size="16" color="#999" />
+        </view>
+      </view>
+
+      <!-- 官方邮箱 - 点击复制 -->
+      <view class="contact-item" bindtap="copyEmail" data-email="{{ email }}">
+        <view class="item-left">
+          <van-icon name="coupon-o" size="16" color="#999" />
+          <text>官方邮箱</text>
+        </view>
+        <view class="item-right">
+          <text class="contact-value">{{ email }}</text>
+          <van-icon name="arrow" size="16" color="#999" />
+        </view>
+      </view>
+
+      <!-- 版本信息 -->
+      <view class="contact-item version-item">
+        <view class="item-left">
+          <van-icon name="info-o" size="16" color="#999" />
+          <text>版本信息</text>
+        </view>
+        <view class="item-right">
+          <text class="contact-value">V{{version}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部版权信息 -->
+  <view class="footer">
+    <text class="copyright">© {{currentYear}} 湖南美途能电子科技有限公司 版权所有</text>
+  </view>
+
+  <!-- 用户信息编辑弹窗 -->
+  <van-popup show="{{showUserDialog}}" position="center" custom-style="width: 80%; border-radius: 24rpx; background-color: #1a1a1a;" bind:close="onDialogClose">
+    <view class="popup-header">
+      <text class="popup-title">编辑个人信息</text>
+      <van-icon name="cross" size="18" color="#999" bindtap="onDialogClose" />
+    </view>
+
+    <view class="popup-content">
+      <!-- 头像编辑 -->
+      <view class="popup-item">
+        <view class="popup-item-left">
+          <image class="popup-avatar" src="{{avatarUrl || '/assets/logo.png'}}" mode="aspectFill"></image>
+          <text>更换头像</text>
+        </view>
+        <view class="popup-item-right">
+          <!-- 获取微信头像按钮 -->
+          <van-button type="primary" size="mini" open-type="chooseAvatar" bindchooseavatar="chooseAvatar" custom-class="get-btn">获取</van-button>
+          <van-icon name="arrow" size="14" color="#999" />
+        </view>
+      </view>
+
+      <!-- 昵称编辑 -->
+      <view class="popup-item">
+        <view class="popup-item-left">
+          <image class="popup-avatar" src="/assets/nicheng.png" mode="aspectFill"></image>
+          <input type="nickname" name="nickname" value="{{tempNickname}}" bindinput="onNicknameInput" placeholder="微信用户" style="font-size:15px; color:#fff; background: transparent; border: none; outline: none; width: 200rpx;" />
+        </view>
+        <view class="popup-item-right">
+          <van-icon name="arrow" size="14" color="#999" />
+        </view>
+      </view>
+    </view>
+  </van-popup>
+</view>

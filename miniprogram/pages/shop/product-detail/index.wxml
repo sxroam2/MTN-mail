@@ -1,0 +1,223 @@
+<view class="page detail-page">
+  <van-loading wx:if="{{ loading }}" size="36px" color="#ff6a45" vertical class="page-loading">加载中...</van-loading>
+
+  <block wx:elif="{{ product }}">
+    <!-- 吸顶导航栏 -->
+    <view class="sticky-nav {{ showStickyNav ? 'visible' : '' }}">
+      <view
+        class="sticky-nav-item {{ activeTab === 'product' ? 'active' : '' }}"
+        bindtap="scrollToSection"
+        data-section="product"
+      >
+        <text>商品</text>
+        <view wx:if="{{ activeTab === 'product' }}" class="nav-indicator"></view>
+      </view>
+      <view
+        class="sticky-nav-item {{ activeTab === 'detail' ? 'active' : '' }}"
+        bindtap="scrollToSection"
+        data-section="detail"
+      >
+        <text>详情</text>
+        <view wx:if="{{ activeTab === 'detail' }}" class="nav-indicator"></view>
+      </view>
+      <view
+        class="sticky-nav-item {{ activeTab === 'specs' ? 'active' : '' }}"
+        bindtap="scrollToSection"
+        data-section="specs"
+      >
+        <text>参数</text>
+        <view wx:if="{{ activeTab === 'specs' }}" class="nav-indicator"></view>
+      </view>
+    </view>
+
+    <!-- [锚点] 商品区域 -->
+    <view id="section-product">
+    <!-- 图片轮播 -->
+    <view class="swiper-wrap">
+    <swiper
+      class="image-swiper"
+      indicator-dots="{{ images.length > 1 }}"
+      indicator-active-color="#ff6a45"
+      indicator-color="rgba(255,255,255,0.3)"
+      autoplay
+      circular
+      current="{{ currentSwiper }}"
+      bindchange="onSwiperChange"
+    >
+      <swiper-item wx:for="{{ images }}" wx:key="id">
+        <image
+          class="product-image"
+          src="{{ item.url }}"
+          mode="aspectFit"
+          bindtap="previewImage"
+          data-index="{{ index }}"
+        />
+      </swiper-item>
+    </swiper>
+    <view class="swiper-counter">{{ currentSwiper + 1 }}/{{ images.length }}</view>
+    </view>
+
+    <!-- 价格区域 -->
+    <view class="price-section">
+      <view class="price-header">
+        <view class="price-info">
+          <view class="price-main">
+            <text class="currency">¥</text>
+            <text class="price-value">{{ selectedPackage ? selectedPackage.priceText : priceRangeText }}</text>
+            <text wx:if="{{ selectedPackage && selectedPackage.originalPriceText }}" class="original-price">¥{{ selectedPackage.originalPriceText }}</text>
+          </view>
+          <view class="product-name-row">
+            <text class="product-name">{{ productName }}</text>
+          </view>
+        </view>
+        <button class="share-btn" open-type="share">
+          <van-icon name="share-o" size="20px" color="#999" />
+          <text class="share-text">分享</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- 已选规格（点击打开抽屉） -->
+    <view class="section-card spec-entry" bindtap="openSkuForCart">
+      <text class="spec-label">已选</text>
+      <text class="spec-value">{{ selectedPackage ? selectedPackage.name : '请选择套餐' }}</text>
+      <van-icon name="arrow" size="14px" color="#666" />
+    </view>
+
+    <!-- 配送信息 -->
+    <view class="section-card delivery-card" bindtap="goAddressSelect">
+      <view class="delivery-row">
+        <text class="delivery-label">配送</text>
+        <text class="delivery-value {{ deliveryAddressText ? 'selected' : '' }}">{{ deliveryAddressText || '请选择地址' }}</text>
+        <van-icon name="arrow" size="14px" color="#666" />
+      </view>
+    </view>
+
+    <!-- 服务说明 -->
+    <view class="section-card service-card" bindtap="showServiceInfo">
+      <view class="service-row">
+        <text class="service-label">服务</text>
+        <text class="service-value">快递发货 · 收货后结算</text>
+        <van-icon name="arrow" size="14px" color="#666" class="service-arrow" />
+      </view>
+    </view>
+    </view><!-- /section-product -->
+
+    <!-- [锚点] 详情区域 -->
+    <view id="section-detail" class="section-card">
+      <view class="section-title">商品详情</view>
+      <view class="detail-content">
+        <view wx:if="{{ productDescription }}" class="detail-text">{{ productDescription }}</view>
+        <!-- 详情图片（优先 detail 类型，回退到轮播图） -->
+        <block wx:if="{{ detailImages.length > 0 }}">
+          <block wx:for="{{ detailImages }}" wx:key="id">
+            <image class="detail-img" src="{{ item.url }}" mode="widthFix" lazy-load />
+          </block>
+        </block>
+        <block wx:else>
+          <block wx:for="{{ images }}" wx:key="id">
+            <image class="detail-img" src="{{ item.url }}" mode="widthFix" lazy-load />
+          </block>
+        </block>
+      </view>
+    </view>
+
+    <!-- [锚点] 参数区域 -->
+    <view id="section-specs" wx:if="{{ specGroups.length > 0 }}" class="section-card">
+      <view class="section-title">商品参数</view>
+      <!-- 多套餐对比模式 -->
+      <block wx:if="{{ hasSpecCompare }}">
+        <view class="compare-table">
+          <view class="compare-header">
+            <view class="compare-key-cell"></view>
+            <view wx:for="{{ specCompareHeaders }}" wx:key="*this" class="compare-val-cell compare-header-cell">{{ item }}</view>
+          </view>
+          <block wx:for="{{ specCompareGroups }}" wx:key="name" wx:for-item="group">
+            <view class="compare-group-row">{{ group.name }}</view>
+            <view wx:for="{{ group.rows }}" wx:key="key" wx:for-item="row" class="compare-row">
+              <view class="compare-key-cell">{{ row.key }}</view>
+              <view wx:for="{{ row.values }}" wx:key="*this" wx:for-item="val" wx:for-index="vIdx" class="compare-val-cell">{{ val }}</view>
+            </view>
+          </block>
+        </view>
+      </block>
+      <!-- 简单参数列表 -->
+      <block wx:else>
+        <block wx:for="{{ specGroups }}" wx:key="name" wx:for-item="group">
+          <view class="spec-group-name">{{ group.name }}</view>
+          <view class="spec-table">
+            <view wx:for="{{ group.items }}" wx:key="id" wx:for-item="spec" class="spec-row">
+              <text class="spec-label-cell">{{ spec.key }}</text>
+              <text class="spec-value-cell">{{ spec.value }}</text>
+            </view>
+          </view>
+        </block>
+      </block>
+    </view>
+
+    <!-- 底部操作栏 -->
+    <van-goods-action custom-class="detail-goods-action">
+      <van-goods-action-icon wx:if="{{ isLoggedIn }}" icon="chat-o" text="客服" bindtap="openCustomerService" color="#bbb" />
+      <van-goods-action-icon icon="shop-o" text="店铺" bindtap="goShop" color="#bbb" />
+      <van-goods-action-icon icon="cart-o" text="购物车" bindtap="goToCart" info="{{ cartCount || '' }}" color="#bbb" />
+      <van-goods-action-button
+        text="{{ isAllSoldOut ? '已售罄' : '加入购物车' }}"
+        type="warning"
+        color="#ff6a45"
+        bindtap="handleGoodsActionAddToCart"
+        disabled="{{ isAllSoldOut }}"
+      />
+      <van-goods-action-button
+        text="{{ isAllSoldOut ? '看看其他' : '立即购买' }}"
+        color="#ff4d4f"
+        bindtap="{{ isAllSoldOut ? 'goShop' : 'handleGoodsActionBuyNow' }}"
+      />
+    </van-goods-action>
+
+    <!-- 服务说明抽屉 -->
+    <van-popup
+      show="{{ showServiceDrawer }}"
+      position="bottom"
+      round
+      closeable
+      close-icon-position="top-right"
+      bind:close="closeServiceDrawer"
+      custom-style="background: #1a1a1a; max-height: 70vh;"
+    >
+      <view class="service-drawer">
+        <view class="service-drawer-section">
+          <view class="service-drawer-title">快递发货</view>
+          <view class="service-drawer-desc">迈瑟伦商城支持快递发货配送上门，运费说明以结算页为准。</view>
+        </view>
+        <view class="service-drawer-section">
+          <view class="service-drawer-title">收货后结算</view>
+          <view class="service-drawer-desc">您的交易资金由迈瑟伦平台全程保障。买家确认收货或到达系统自动确认收货时间后，货款将结算给商家，请放心购买。</view>
+        </view>
+        <view class="service-drawer-section">
+          <view class="service-drawer-title">售后保障</view>
+          <view class="service-drawer-desc">如商品存在质量问题，您可在收货后 7 天内申请退换货，迈瑟伦客服团队将全程协助处理。</view>
+        </view>
+        <view class="service-drawer-btn">
+          <van-button round block color="linear-gradient(90deg, #ff6a45, #ff4d4f)" bindtap="closeServiceDrawer">我知道了</van-button>
+        </view>
+      </view>
+    </van-popup>
+
+    <!-- 规格选择抽屉 -->
+    <sku-drawer
+      show="{{ showSkuDrawer }}"
+      product="{{ product }}"
+      productName="{{ productName }}"
+      packages="{{ packages }}"
+      defaultThumbUrl="{{ (defaultDisplayPackage && defaultDisplayPackage.thumbUrl) || (images[0] && images[0].url) || '' }}"
+      priceRangeText="{{ priceRangeText }}"
+      selectedPackageId="{{ selectedPackage.id || 0 }}"
+      initQuantity="{{ quantity }}"
+      loading="{{ skuLoading }}"
+      bind:close="closeSkuDrawer"
+      bind:selectpackage="onSkuSelectPackage"
+      bind:addcart="onSkuAddCart"
+      bind:buynow="onSkuBuyNow"
+    />
+  </block>
+</view>

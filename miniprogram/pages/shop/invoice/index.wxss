@@ -1,0 +1,140 @@
+/* 发票信息填写页 - 深色风格 */
+.page {
+  min-height: 100vh;
+  background: #000;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 120rpx);
+}
+
+.page-tip {
+  margin: 24rpx 24rpx 0;
+  padding: 22rpx 24rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 106, 69, 0.08);
+  color: #ffb199;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.section-card {
+  margin: 20rpx 24rpx;
+  padding: 30rpx;
+  background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+  border-radius: 24rpx;
+}
+
+.section-title {
+  font-size: 24rpx;
+  color: #aaa;
+  font-weight: 500;
+  margin-bottom: 20rpx;
+}
+
+/* 发票类型 tabs */
+.invoice-tabs {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 36rpx;
+}
+.invoice-tab {
+  padding: 12rpx 32rpx;
+  font-size: 26rpx;
+  border: 1rpx solid #333;
+  border-radius: 40rpx;
+  background: transparent;
+  color: #999;
+  white-space: nowrap;
+}
+.invoice-tab.active {
+  border-color: #ff6a45;
+  color: #ff6a45;
+}
+
+/* 抬头类型 radio */
+.invoice-subject-row {
+  display: flex;
+  align-items: center;
+}
+.invoice-subject-label {
+  font-size: 26rpx;
+  color: #aaa;
+  width: 160rpx;
+  flex-shrink: 0;
+}
+.invoice-subject-options {
+  display: flex;
+  gap: 48rpx;
+}
+.invoice-radio {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  font-size: 26rpx;
+  color: #ccc;
+}
+.radio-dot {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  border: 3rpx solid #444;
+  position: relative;
+  box-sizing: border-box;
+}
+.invoice-radio.checked {
+  color: #fff;
+}
+.invoice-radio.checked .radio-dot {
+  border-color: #ff6a45;
+}
+.invoice-radio.checked .radio-dot::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: #ff6a45;
+}
+
+/* 发票表单字段 */
+.invoice-form-row {
+  display: flex;
+  align-items: center;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.06);
+}
+.invoice-form-row:last-child,
+.invoice-form-row--last {
+  border-bottom: none;
+}
+.invoice-form-label {
+  font-size: 26rpx;
+  color: #fff;
+  width: 160rpx;
+  flex-shrink: 0;
+}
+.invoice-form-input {
+  flex: 1;
+  font-size: 26rpx;
+  color: #fff;
+  background: transparent;
+  border: none;
+  text-align: right;
+  min-width: 0;
+}
+.invoice-form-placeholder {
+  color: #555;
+}
+
+.tip-text {
+  padding: 8rpx 40rpx 16rpx;
+  font-size: 22rpx;
+  color: #555;
+  line-height: 1.6;
+}
+
+.save-btn-wrap {
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+}

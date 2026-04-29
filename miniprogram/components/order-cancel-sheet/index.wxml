@@ -1,0 +1,40 @@
+<van-popup
+  show="{{ show }}"
+  position="bottom"
+  round
+  custom-style="background: #1a1a1a;"
+  bind:close="onClose"
+>
+  <view class="cancel-popup" catchtap="noop">
+    <view class="cancel-popup__header">
+      <text class="cancel-popup__title">{{ title }}</text>
+    </view>
+
+    <view class="cancel-popup__reasons">
+      <view
+        wx:for="{{ reasons }}"
+        wx:key="index"
+        class="reason-item {{ selectedReason === item ? 'reason-item--active' : '' }}"
+        bindtap="selectReason"
+        data-reason="{{ item }}"
+      >
+        <text class="reason-text">{{ item }}</text>
+        <view class="reason-radio {{ selectedReason === item ? 'reason-radio--checked' : '' }}">
+          <van-icon wx:if="{{ selectedReason === item }}" name="success" size="14px" color="#fff" />
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{ showAddToCart }}" class="cancel-popup__cart-row" bindtap="toggleAddToCart">
+      <view class="cart-check {{ addToCart ? 'cart-check--checked' : '' }}">
+        <van-icon wx:if="{{ addToCart }}" name="success" size="12px" color="#fff" />
+      </view>
+      <text class="cart-check-label">提交后将本单商品放入购物车</text>
+    </view>
+
+    <view class="cancel-popup__footer">
+      <button class="cancel-popup__btn-think" bindtap="onClose">再想想</button>
+      <button class="cancel-popup__btn-confirm" bindtap="onConfirm">取消订单</button>
+    </view>
+  </view>
+</van-popup>

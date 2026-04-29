@@ -1,0 +1,94 @@
+<!-- SKU 规格选择抽屉组件 -->
+<van-popup
+  show="{{ show }}"
+  position="bottom"
+  round
+  closeable
+  close-icon-position="top-right"
+  bind:close="onClose"
+  custom-style="background: #1a1a1a; max-height: 75vh;"
+>
+  <view class="sku-drawer" wx:if="{{ product }}">
+    <!-- 头部：缩略图 + 价格信息 -->
+    <view class="sku-header">
+      <view class="sku-header-thumb" bindtap="onThumbTap">
+        <van-image
+          width="160rpx"
+          height="160rpx"
+          src="{{ thumbUrl }}"
+          fit="cover"
+          radius="12rpx"
+        />
+      </view>
+      <view class="sku-header-info">
+        <text class="sku-price">¥ {{ selectedPkg.priceText || selectedPkg.price || priceRangeText || '' }}</text>
+        <text class="sku-selected-name">{{ selectedPkg.id ? '已选 ' + selectedPkg.name : '请选择套餐' }}</text>
+        <text class="sku-stock">{{ selectedPkg.id ? '库存: ' + selectedPkg.stock : '选择套餐后查看库存' }}</text>
+      </view>
+    </view>
+
+    <!-- 规格列表 -->
+    <view class="sku-section">
+      <view class="sku-pkg-list">
+        <view
+          wx:for="{{ packages }}"
+          wx:key="id"
+          class="sku-pkg-item {{ selectedPkg.id === item.id ? 'selected' : '' }} {{ item.stock <= 0 ? 'disabled' : '' }}"
+          data-id="{{ item.id }}"
+          catchtap="onPkgTap"
+        >
+          <van-image
+            wx:if="{{ item.thumbUrl }}"
+            width="56rpx"
+            height="56rpx"
+            src="{{ item.thumbUrl }}"
+            fit="cover"
+            radius="8rpx"
+          />
+          <view class="sku-pkg-info">
+            <text class="sku-pkg-name">{{ item.name }}</text>
+            <text wx:if="{{ item.description }}" class="sku-pkg-desc">{{ item.description }}</text>
+            <text class="sku-pkg-price">¥{{ item.price }}</text>
+          </view>
+          <text wx:if="{{ item.stock <= 0 }}" class="sku-pkg-sold-out">缺货</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 购买数量 -->
+    <view class="sku-quantity-row">
+      <text class="sku-quantity-label">购买数量</text>
+      <view class="qty-stepper">
+        <view class="qty-btn {{ quantity <= 1 ? 'disabled' : '' }}" catchtap="onMinus">−</view>
+        <text class="qty-value">{{ quantity }}</text>
+        <view class="qty-btn {{ quantity >= maxStock ? 'disabled' : '' }}" catchtap="onPlus">＋</view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view wx:if="{{ mode === 'cart-only' }}" class="sku-btn-wrap">
+      <van-button
+        round
+        block
+        color="linear-gradient(90deg, #ff6a45, #ff4d4f)"
+        disabled="{{ !selectedPkg.id || selectedPkg.stock <= 0 }}"
+        loading="{{ loading }}"
+        bindtap="onAddCart"
+      >加入购物车</van-button>
+    </view>
+    <view wx:elif="{{ mode === 'confirm' }}" class="sku-btn-wrap">
+      <van-button
+        round
+        block
+        color="linear-gradient(90deg, #ff6a45, #ff4d4f)"
+        disabled="{{ !selectedPkg.id || selectedPkg.stock <= 0 }}"
+        loading="{{ loading }}"
+        bindtap="onConfirm"
+      >确定</van-button>
+    </view>
+    <view wx:else class="sku-btn-bar {{ (!selectedPkg.id || selectedPkg.stock <= 0) ? 'disabled' : '' }}">
+      <view class="sku-btn-bar-left" catchtap="onAddCart">加入购物车</view>
+      <view class="sku-btn-bar-right" catchtap="onBuyNow">立即购买</view>
+    </view>
+  </view>
+</van-popup>

@@ -1,0 +1,125 @@
+<!-- 搜索页 -->
+<view class="page">
+  <!-- 搜索栏 -->
+  <van-search
+    value="{{ keyword }}"
+    placeholder="搜索商品名称"
+    shape="round"
+    focus="{{ true }}"
+    show-action
+    background="#0a0a0a"
+    bind:change="onSearchInput"
+    bind:search="doSearch"
+    bind:cancel="onCancel"
+  />
+
+  <!-- 搜索前：历史搜索 + 热门搜索 -->
+  <block wx:if="{{ !searched }}">
+    <!-- 搜索历史 -->
+    <view wx:if="{{ history.length > 0 }}" class="section">
+      <view class="section-header">
+        <text class="section-title">搜索历史</text>
+        <van-icon name="delete-o" size="18px" color="#666" bindtap="clearHistory" />
+      </view>
+      <view class="tag-list">
+        <view
+          wx:for="{{ history }}"
+          wx:key="*this"
+          class="history-tag"
+          bindtap="onHistoryTap"
+          data-word="{{ item }}"
+        >{{ item }}</view>
+      </view>
+    </view>
+
+    <!-- 热门搜索 -->
+    <view wx:if="{{ hotWords.length > 0 }}" class="section">
+      <view class="section-header">
+        <text class="section-title">热门搜索</text>
+      </view>
+      <view class="hot-list">
+        <view
+          wx:for="{{ hotWords }}"
+          wx:key="*this"
+          class="hot-item"
+          bindtap="onHotTap"
+          data-word="{{ item }}"
+        >
+          <view class="hot-rank {{ index < 3 ? 'hot-rank-top' : '' }}">{{ index + 1 }}</view>
+          <text class="hot-word">{{ item }}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 搜索结果 -->
+  <block wx:else>
+    <van-loading wx:if="{{ loading }}" size="36px" color="#ff6a45" vertical class="page-loading">搜索中...</van-loading>
+
+    <view wx:elif="{{ results.length === 0 }}" class="empty-wrap">
+      <van-icon name="search" size="60px" color="#ccc" />
+      <text class="empty-text">未找到相关商品</text>
+    </view>
+
+    <view wx:else class="product-list">
+      <view
+        wx:for="{{ results }}"
+        wx:key="id"
+        class="product-card"
+        bindtap="goDetail"
+        data-id="{{ item.id }}"
+        hover-class="card-hover"
+      >
+        <view class="card-img-wrap">
+          <van-image
+            width="220rpx"
+            height="220rpx"
+            src="{{ item.img }}"
+            fit="cover"
+            radius="12rpx"
+            lazy-load
+          />
+          <view wx:if="{{ item.stock <= 0 }}" class="soldout-mask">
+            <text class="soldout-text">已售罄</text>
+          </view>
+        </view>
+
+        <view class="card-info">
+          <text class="card-title">{{ item.title }}</text>
+          <view class="card-tags">
+            <text wx:if="{{ item.isNew }}" class="tag tag-new">新品</text>
+            <text wx:if="{{ item.originalPrice && item.stock > 0 }}" class="tag tag-flash">限时价</text>
+          </view>
+          <view class="card-bottom">
+            <view class="card-price-row">
+              <text class="card-price">¥{{ item.priceText }}</text>
+              <text wx:if="{{ item.originalPriceText }}" class="card-original-price">¥{{ item.originalPriceText }}</text>
+            </view>
+          </view>
+          <view
+            class="card-cart-btn {{ item.stock <= 0 ? 'disabled' : '' }}"
+            catchtap="onQuickAdd"
+            data-id="{{ item.id }}"
+            data-index="{{ index }}"
+          >
+            <van-icon name="cart-o" size="14px" color="#ff6a45" />
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <sku-drawer
+      show="{{ showSku }}"
+      product="{{ skuProduct }}"
+      productName="{{ skuProduct.title }}"
+      packages="{{ skuPackages }}"
+      defaultThumbUrl="{{ skuProduct.img }}"
+      priceRangeText="{{ skuProduct.priceText }}"
+      mode="cart-only"
+      autoSelectFirst
+      loading="{{ skuAdding }}"
+      bind:close="closeSku"
+      bind:addcart="onSkuAddCart"
+    />
+  </block>
+</view>

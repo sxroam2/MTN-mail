@@ -1,0 +1,487 @@
+<view class="page">
+  <van-loading wx:if="{{ loading }}" size="36px" color="#ff6a45" vertical class="page-loading">加载中...</van-loading>
+
+  <block wx:elif="{{ order }}">
+    <view wx:if="{{ order.orderStatus === 0 || order.orderStatus === 7 }}" class="status-banner status-banner-pay">
+      <view class="status-main">
+        <text class="status-text">请在 {{ countdown || '...' }} 内支付</text>
+        <text class="status-sub">超时订单将自动关闭</text>
+      </view>
+      <view class="status-top-btns">
+        <button wx:if="{{ order.orderStatus === 0 }}" class="btn-cancel-top" bindtap="cancelOrder">取消订单</button>
+        <button class="btn-pay-top" bindtap="payOrder">去支付 ¥{{ order.payAmount }}</button>
+      </view>
+    </view>
+
+    <view wx:else class="status-banner status-banner-normal">
+      <text class="status-text">{{ statusText }}</text>
+    </view>
+
+    <view wx:if="{{ logistics }}" class="section-card" bindtap="goLogistics">
+      <view class="section-title">
+        <text>物流信息</text>
+        <van-icon name="arrow" size="14px" color="#999" />
+      </view>
+      <view class="logistics-info">
+        <text class="logistics-company">{{ logistics.logisticsCompany }} {{ logistics.logisticsNo }}</text>
+        <text class="logistics-latest">{{ logistics.latestContent }}</text>
+        <text class="logistics-time">{{ logistics.latestTime }}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{ order.snapReceiver }}" class="section-card">
+      <view class="addr-row">
+        <van-icon name="location-o" size="18px" color="#ff6a45" />
+        <view class="addr-info">
+          <view class="addr-top">
+            <text class="addr-name">{{ order.snapReceiver }}</text>
+            <text class="addr-phone">{{ order.snapPhone }}</text>
+          </view>
+          <text class="addr-detail">{{ order.snapAddress }}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{ order.orderStatus === 0 || order.orderStatus === 7 }}" class="section-card">
+      <view class="info-row">
+        <text class="info-label">配送方式</text>
+        <text class="info-value">快递</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">买家留言</text>
+        <text class="info-value">{{ order.remark || '无' }}</text>
+      </view>
+    </view>
+
+    <view class="section-card">
+      <view class="info-row">
+        <text class="info-label">订单编号</text>
+        <view class="info-value-wrap" bindtap="copyOrderNo">
+          <text class="info-value">{{ orderNo }}</text>
+          <text class="copy-btn">复制</text>
+        </view>
+      </view>
+      <view wx:if="{{ order.createTimeText }}" class="info-row">
+        <text class="info-label">下单时间</text>
+        <text class="info-value">{{ order.createTimeText }}</text>
+      </view>
+      <view wx:if="{{ order.payTimeText }}" class="info-row">
+        <text class="info-label">支付时间</text>
+        <text class="info-value">{{ order.payTimeText }}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{ showInvoiceSection }}" class="section-card">
+      <view class="section-title">
+        <text>发票信息</text>
+        <view wx:if="{{ canApplyInvoice }}" class="section-title-action" bindtap="openInvoiceApply">申请开票</view>
+      </view>
+      <view class="info-row">
+        <text class="info-label">发票状态</text>
+        <text class="info-value">{{ invoiceStatusText }}</text>
+      </view>
+      <view wx:if="{{ order.invoiceTitle }}" class="info-row info-row--top">
+        <text class="info-label">发票抬头</text>
+        <text class="info-value invoice-value-text">{{ order.invoiceTitle }}</text>
+      </view>
+      <view wx:if="{{ order.invoiceEmail }}" class="info-row info-row--top">
+        <text class="info-label">接收邮箱</text>
+        <text class="info-value invoice-value-text">{{ order.invoiceEmail }}</text>
+      </view>
+      <view wx:if="{{ order.invoiceFailReason }}" class="invoice-tip">{{ order.invoiceFailReason }}</view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-title">商品列表</view>
+      <view wx:for="{{ items }}" wx:key="id" class="order-item">
+        <van-image
+          width="120rpx"
+          height="120rpx"
+          src="{{ item.imageUrl }}"
+          fit="cover"
+          radius="8rpx"
+        />
+        <view class="item-info">
+          <text class="item-name">{{ item.productName }}</text>
+          <view class="item-spec-row">
+            <text wx:if="{{ item.packageName }}" class="item-spec">{{ item.packageName }}</text>
+            <text class="item-qty">x{{ item.quantity }}</text>
+          </view>
+          <text wx:if="{{ item.description }}" class="item-desc">{{ item.description }}</text>
+          <view class="item-bottom">
+            <text class="item-price">¥{{ item.price }}</text>
+          </view>
+          <view wx:if="{{ item.afterSalesLocked }}" class="item-after-sales-state">{{ item.afterSalesLockReason }}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-card">
+      <view class="price-row">
+        <text class="price-label">商品总价</text>
+        <text class="price-val">¥{{ order.totalAmount }}</text>
+      </view>
+      <view class="price-row">
+        <text class="price-label">运费</text>
+        <text class="price-val">¥{{ order.shippingAmount }}</text>
+      </view>
+      <view wx:if="{{ order.discountAmount > 0 }}" class="price-row">
+        <text class="price-label">优惠</text>
+        <text class="price-val discount">-¥{{ order.discountAmount }}</text>
+      </view>
+      <view class="price-row total-row">
+        <text class="price-label">实付金额</text>
+        <text class="pay-amount">¥{{ order.payAmount }}</text>
+      </view>
+      <view wx:if="{{ refundSummary && refundSummary.refundedAmount > 0 }}" class="price-row">
+        <text class="price-label">已退金额</text>
+        <text class="price-val">¥{{ refundSummary.refundedAmountText }}</text>
+      </view>
+      <view wx:if="{{ refundSummary }}" class="price-row">
+        <text class="price-label">剩余可退金额</text>
+        <text class="price-val">¥{{ refundSummary.remainingRefundAmountText }}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{ afterSalesRequests.length }}" class="section-card">
+      <view class="section-title">售后记录</view>
+      <view wx:for="{{ afterSalesRequests }}" wx:key="id" class="after-sales-record">
+        <view class="after-sales-record-head">
+          <text class="after-sales-record-title">{{ item.typeLabel }}</text>
+          <text class="after-sales-record-status">{{ item.statusLabel }}</text>
+        </view>
+        <view class="after-sales-record-meta">
+          <text>{{ item.reason || '-' }}</text>
+          <text>{{ item.createTimeText || '-' }}</text>
+        </view>
+        <view wx:if="{{ item.requestedRefundAmountText }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">售后金额</text>
+          <text class="after-sales-record-value">¥{{ item.requestedRefundAmountText }}</text>
+        </view>
+        <view wx:if="{{ item.priceDiffSummaryText }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">商品差价</text>
+          <text class="after-sales-record-value">{{ item.priceDiffSummaryText }}</text>
+        </view>
+        <view wx:if="{{ item.pickupServiceFeeText && !item.showDetailAction }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">上门取件费</text>
+          <text class="after-sales-record-value">¥{{ item.pickupServiceFeeText }}</text>
+        </view>
+        <view wx:if="{{ item.deliveryFeeText }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">{{ item.afterSaleType === 'exchange' ? '换货发货运费' : '维修发货运费' }}</text>
+          <text class="after-sales-record-value">¥{{ item.deliveryFeeText }}</text>
+        </view>
+        <view wx:if="{{ item.supplementPayAmountText && !item.showDetailAction }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">补差支付</text>
+          <text class="after-sales-record-value">¥{{ item.supplementPayAmountText }}</text>
+        </view>
+        <view wx:if="{{ item.supplementPayTimeText && !item.showDetailAction }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">补差时间</text>
+          <text class="after-sales-record-value">{{ item.supplementPayTimeText }}</text>
+        </view>
+        <view wx:if="{{ item.shippingMethodLabel && item.shippingMethodLabel !== '-' }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">寄回方式</text>
+          <text class="after-sales-record-value">{{ item.shippingMethodLabel }}</text>
+        </view>
+        <view wx:if="{{ item.pickupWindowText }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">预约取件</text>
+          <text class="after-sales-record-value">{{ item.pickupWindowText }}</text>
+        </view>
+        <view wx:if="{{ item.returnAddressText }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">寄回地址</text>
+          <text class="after-sales-record-value after-sales-record-value--multiline">{{ item.returnAddressText }}</text>
+        </view>
+        <view wx:if="{{ item.returnLogisticsCompany }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">物流公司</text>
+          <text class="after-sales-record-value">{{ item.returnLogisticsCompany }}</text>
+        </view>
+        <view wx:if="{{ item.returnTrackingNo }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">快递单号</text>
+          <text class="after-sales-record-value">{{ item.returnTrackingNo }}</text>
+        </view>
+        <view wx:if="{{ item.exchangeLogisticsCompany && !item.showDetailAction }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">换货物流公司</text>
+          <text class="after-sales-record-value">{{ item.exchangeLogisticsCompany }}</text>
+        </view>
+        <view wx:if="{{ item.exchangeTrackingNo }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">换货发货单号</text>
+          <text class="after-sales-record-value after-sales-record-link" data-after-sale-no="{{ item.afterSaleNo }}" data-mode="exchange" bindtap="openShipmentTrackingPopup">{{ item.exchangeTrackingNo }}</text>
+        </view>
+        <view wx:if="{{ item.exchangeLogisticsCustomerName && !item.showDetailAction }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">换货收件人</text>
+          <text class="after-sales-record-value">{{ item.exchangeLogisticsCustomerName }}</text>
+        </view>
+        <view wx:if="{{ item.repairTrackingNo }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">维修发货单号</text>
+          <text class="after-sales-record-value after-sales-record-link" data-after-sale-no="{{ item.afterSaleNo }}" data-mode="repair" bindtap="openShipmentTrackingPopup">{{ item.repairTrackingNo }}</text>
+        </view>
+        <view wx:if="{{ item.processRemark }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">处理备注</text>
+          <text class="after-sales-record-value after-sales-record-value--multiline">{{ item.processRemark }}</text>
+        </view>
+        <view wx:if="{{ item.showDetailAction || item.canEditTracking }}" class="after-sales-record-actions">
+          <view wx:if="{{ item.showDetailAction }}" class="after-sales-record-action-btn" data-after-sale-no="{{ item.afterSaleNo }}" bindtap="openAfterSalesDetailPopup">
+            {{ item.detailActionText }}
+          </view>
+          <view wx:if="{{ item.canEditTracking }}" class="after-sales-record-action-btn" data-after-sale-no="{{ item.afterSaleNo }}" bindtap="openReturnTrackingPopup">
+            {{ item.trackingActionText }}
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{ refundRecords.length }}" class="section-card">
+      <view class="section-title">退款记录</view>
+      <view wx:for="{{ refundRecords }}" wx:key="index" class="after-sales-record">
+        <view class="after-sales-record-head">
+          <text class="after-sales-record-title">退款 ¥{{ item.refundAmountText }}</text>
+          <text class="after-sales-record-status">{{ item.refundStatusText }}</text>
+        </view>
+        <view class="after-sales-record-meta">
+          <text>{{ item.refundReason || '-' }}</text>
+          <text>{{ item.refundTimeText || '-' }}</text>
+        </view>
+        <view wx:if="{{ item.refundRemark }}" class="after-sales-record-row">
+          <text class="after-sales-record-label">退款备注</text>
+          <text class="after-sales-record-value after-sales-record-value--multiline">{{ item.refundRemark }}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{ afterSalesEntryTip && (afterSalesOrderStage === 1 || afterSalesOrderStage === 2 || afterSalesOrderStage === 3) }}" class="section-tip-plain">
+      <text class="section-tip-plain__text">{{ afterSalesEntryTip }}</text>
+    </view>
+
+    <view wx:if="{{ showRefundClosedBuyAgainOnly || afterSalesOrderStage === 1 || afterSalesOrderStage === 2 || afterSalesOrderStage === 3 }}" class="action-bar">
+      <block wx:if="{{ showRefundClosedBuyAgainOnly }}">
+        <button class="action-btn action-btn--accent" bindtap="buyAgain">再来一单</button>
+      </block>
+
+      <block wx:elif="{{ afterSalesOrderStage === 1 }}">
+        <button wx:if="{{ canRequestAfterSales }}" class="action-btn action-btn--accent" bindtap="goRefund">{{ afterSalesActionText }}</button>
+      </block>
+
+      <block wx:elif="{{ afterSalesOrderStage === 2 }}">
+        <button wx:if="{{ logistics || order.logisticsNo }}" class="action-btn action-btn--neutral" bindtap="goLogistics">查看物流</button>
+        <button wx:if="{{ canRequestAfterSales }}" class="action-btn action-btn--accent" bindtap="goRefund">{{ afterSalesActionText }}</button>
+        <button wx:if="{{ canConfirmReceipt }}" class="action-btn action-btn--accent" bindtap="confirmReceipt">确认收货</button>
+      </block>
+
+      <block wx:elif="{{ afterSalesOrderStage === 3 }}">
+        <button wx:if="{{ canRequestAfterSales }}" class="action-btn action-btn--accent" bindtap="goRefund">{{ afterSalesActionText }}</button>
+        <button wx:if="{{ logistics || order.logisticsNo }}" class="action-btn action-btn--neutral" bindtap="goLogistics">物流轨迹</button>
+      </block>
+    </view>
+  </block>
+
+  <order-cancel-sheet
+    show="{{ showCancelPopup }}"
+    bind:close="onCancelPopupClose"
+    bind:confirm="confirmCancel"
+  />
+
+  <van-popup
+    show="{{ showReturnTrackingPopup }}"
+    position="bottom"
+    round
+    custom-style="background: #1a1a1a;"
+    bind:close="closeReturnTrackingPopup"
+  >
+    <view class="tracking-popup" catchtap="noop">
+      <view class="tracking-popup__header">
+        <text class="tracking-popup__title">填写寄回物流</text>
+      </view>
+
+      <view class="tracking-popup__body">
+        <view class="tracking-popup__field">
+          <text class="tracking-popup__label">快递单号</text>
+          <input
+            class="tracking-popup__input"
+            value="{{ trackingReturnTrackingNo }}"
+            placeholder="请填写寄回快递单号"
+            placeholder-class="tracking-popup__placeholder"
+            bindinput="onReturnTrackingNoInput"
+          />
+        </view>
+
+        <view class="tracking-popup__field">
+          <view class="tracking-popup__label-row">
+            <text class="tracking-popup__label">物流公司</text>
+            <text wx:if="{{ trackingAutoDetectedCompany }}" class="tracking-popup__assist">已自动识别，可手动修改</text>
+          </view>
+          <input
+            class="tracking-popup__input"
+            value="{{ trackingReturnLogisticsCompany }}"
+            placeholder="请填写物流公司"
+            placeholder-class="tracking-popup__placeholder"
+            bindinput="onReturnLogisticsCompanyInput"
+          />
+        </view>
+      </view>
+
+      <view class="tracking-popup__footer">
+        <button class="tracking-popup__btn-cancel" bindtap="closeReturnTrackingPopup">取消</button>
+        <button class="tracking-popup__btn-confirm" loading="{{ returnTrackingSubmitting }}" bindtap="submitReturnTracking">确认提交</button>
+      </view>
+    </view>
+  </van-popup>
+
+  <van-popup
+    show="{{ showAfterSalesDetailPopup }}"
+    position="bottom"
+    round
+    custom-style="background: #131313; max-height: 86vh;"
+    bind:close="closeAfterSalesDetailPopup"
+  >
+    <view class="detail-popup" catchtap="noop">
+      <view class="detail-popup__header">
+        <text class="detail-popup__title">{{ afterSalesDetail.popupTitle }}</text>
+      </view>
+
+      <scroll-view wx:if="{{ afterSalesDetail }}" scroll-y class="detail-popup__body">
+        <view class="detail-popup__hero">
+          <view class="detail-popup__hero-head">
+            <text class="detail-popup__hero-type">{{ afterSalesDetail.typeLabel }}</text>
+            <text class="detail-popup__hero-status">{{ afterSalesDetail.statusLabel }}</text>
+          </view>
+          <text class="detail-popup__hero-reason">{{ afterSalesDetail.reason || '-' }}</text>
+          <text class="detail-popup__hero-time">{{ afterSalesDetail.createTimeText || '-' }}</text>
+        </view>
+
+        <view wx:if="{{ afterSalesDetail.items && afterSalesDetail.items.length }}" class="detail-popup__section">
+          <text class="detail-popup__section-title">商品明细</text>
+          <view wx:for="{{ afterSalesDetail.items }}" wx:key="index" class="exchange-pair">
+            <view class="exchange-card exchange-card--origin">
+              <view class="exchange-card__media">
+                <image wx:if="{{ item.imageUrl }}" class="exchange-card__image" src="{{ item.imageUrl }}" mode="aspectFill" />
+              </view>
+              <view class="exchange-card__body">
+                <view class="exchange-card__title-row">
+                  <text class="exchange-card__name">{{ item.productName }}</text>
+                  <text wx:if="{{ afterSalesDetail.isExchange }}" class="exchange-card__badge exchange-card__badge--origin">原商品</text>
+                </view>
+                <text wx:if="{{ item.packageText }}" class="exchange-card__meta">{{ item.packageText }}</text>
+                <text wx:if="{{ item.priceLineText }}" class="exchange-card__price">{{ item.priceLineText }}</text>
+              </view>
+            </view>
+            <view wx:if="{{ afterSalesDetail.isExchange }}" class="exchange-pair__connector">
+              <view class="exchange-pair__connector-line"></view>
+              <text class="exchange-pair__connector-dot">换</text>
+              <view class="exchange-pair__connector-line"></view>
+            </view>
+            <view wx:if="{{ afterSalesDetail.isExchange }}" class="exchange-card exchange-card--target">
+              <view class="exchange-card__media exchange-card__media--target">
+                <image wx:if="{{ item.exchangeImageUrl }}" class="exchange-card__image" src="{{ item.exchangeImageUrl }}" mode="aspectFill" />
+              </view>
+              <view class="exchange-card__body">
+                <view class="exchange-card__title-row">
+                  <text class="exchange-card__name">{{ item.exchangeTitle || '-' }}</text>
+                  <text class="exchange-card__badge exchange-card__badge--target">新商品</text>
+                </view>
+                <text wx:if="{{ item.exchangePackageText }}" class="exchange-card__meta">{{ item.exchangePackageText }}</text>
+                <text wx:if="{{ item.exchangePriceLineText }}" class="exchange-card__price">{{ item.exchangePriceLineText }}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="detail-popup__section detail-popup__section--processing">
+          <text class="detail-popup__section-title">处理信息</text>
+          <view wx:if="{{ afterSalesDetail.requestedRefundAmountText }}" class="detail-popup__row"><text>售后金额</text><text>¥{{ afterSalesDetail.requestedRefundAmountText }}</text></view>
+          <view wx:if="{{ afterSalesDetail.priceDiffSummaryText }}" class="detail-popup__row"><text>商品差价</text><text>{{ afterSalesDetail.priceDiffSummaryText }}</text></view>
+          <view wx:if="{{ afterSalesDetail.pickupServiceFeeText }}" class="detail-popup__row"><text>上门取件费</text><text>¥{{ afterSalesDetail.pickupServiceFeeText }}</text></view>
+          <view wx:if="{{ afterSalesDetail.deliveryFeeText }}" class="detail-popup__row"><text>{{ afterSalesDetail.afterSaleType === 'exchange' ? '换货发货运费' : '维修发货运费' }}</text><text>¥{{ afterSalesDetail.deliveryFeeText }}</text></view>
+          <view wx:if="{{ afterSalesDetail.supplementPayAmountText }}" class="detail-popup__row"><text>补差支付</text><text>¥{{ afterSalesDetail.supplementPayAmountText }}</text></view>
+          <view wx:if="{{ afterSalesDetail.supplementPayTimeText }}" class="detail-popup__row"><text>补差时间</text><text>{{ afterSalesDetail.supplementPayTimeText }}</text></view>
+          <view wx:if="{{ afterSalesDetail.shippingMethodLabel && afterSalesDetail.shippingMethodLabel !== '-' }}" class="detail-popup__row"><text>寄回方式</text><text>{{ afterSalesDetail.shippingMethodLabel }}</text></view>
+          <view wx:if="{{ afterSalesDetail.pickupWindowText }}" class="detail-popup__row"><text>预约取件</text><text>{{ afterSalesDetail.pickupWindowText }}</text></view>
+          <view wx:if="{{ afterSalesDetail.returnAddressText }}" class="detail-popup__row detail-popup__row--multiline"><text>寄回地址</text><text>{{ afterSalesDetail.returnAddressText }}</text></view>
+          <view wx:if="{{ afterSalesDetail.returnLogisticsCompany }}" class="detail-popup__row"><text>寄回物流公司</text><text>{{ afterSalesDetail.returnLogisticsCompany }}</text></view>
+          <view wx:if="{{ afterSalesDetail.returnTrackingNo }}" class="detail-popup__row"><text>寄回快递单号</text><text>{{ afterSalesDetail.returnTrackingNo }}</text></view>
+          <view wx:if="{{ afterSalesDetail.exchangeTrackingNo }}" class="detail-popup__row"><text>换货发货单号</text><text>{{ afterSalesDetail.exchangeTrackingNo }}</text></view>
+          <view wx:if="{{ afterSalesDetail.repairTrackingNo }}" class="detail-popup__row"><text>维修发货单号</text><text>{{ afterSalesDetail.repairTrackingNo }}</text></view>
+          <view wx:if="{{ afterSalesDetail.processRemark }}" class="detail-popup__row detail-popup__row--multiline"><text>处理备注</text><text>{{ afterSalesDetail.processRemark }}</text></view>
+        </view>
+      </scroll-view>
+
+      <view class="detail-popup__footer">
+        <button class="tracking-popup__btn-confirm" bindtap="closeAfterSalesDetailPopup">关闭</button>
+      </view>
+    </view>
+  </van-popup>
+
+  <van-popup
+    show="{{ showShipmentTrackingPopup }}"
+    position="bottom"
+    round
+    custom-style="background: #111; max-height: 86vh;"
+    bind:close="closeShipmentTrackingPopup"
+  >
+    <view class="shipment-popup" catchtap="noop">
+      <view class="detail-popup__header">
+        <text class="detail-popup__title">{{ shipmentTrackingTitle }}</text>
+      </view>
+
+      <scroll-view scroll-y class="shipment-popup__body">
+        <view wx:if="{{ shipmentTrackingLoading }}" class="shipment-popup__state">物流轨迹加载中...</view>
+        <block wx:else>
+          <view class="hero-card shipment-popup__hero">
+            <view class="hero-card__head">
+              <text class="hero-card__eyebrow">物流追踪</text>
+            </view>
+
+            <view class="hero-card__main">
+              <view class="hero-card__icon">
+                <van-icon name="logistics" size="22px" color="#ff6a45" />
+              </view>
+              <view class="hero-card__info">
+                <text class="hero-card__company">{{ shipmentTrackingCompany || '物流公司' }}</text>
+                <text class="hero-card__no">运单号：{{ shipmentTrackingNo || '待生成' }}</text>
+              </view>
+              <view wx:if="{{ shipmentTrackingNo }}" class="hero-card__copy" bindtap="copyShipmentTrackingNo">复制</view>
+            </view>
+
+            <view wx:if="{{ shipmentTrackingLatestContent }}" class="hero-card__latest">
+              <text class="hero-card__latest-label">最新轨迹</text>
+              <text class="hero-card__latest-text">{{ shipmentTrackingLatestContent }}</text>
+              <text class="hero-card__latest-time">{{ shipmentTrackingLatestTime }}</text>
+            </view>
+          </view>
+
+          <view wx:if="{{ shipmentTrackingTraces.length > 0 }}" class="trace-card">
+            <view class="trace-card__head">
+              <text class="trace-card__title">物流轨迹</text>
+              <text class="trace-card__meta">共 {{ shipmentTrackingTraces.length }} 条</text>
+            </view>
+
+            <view wx:for="{{ shipmentTrackingTraces }}" wx:key="index" class="trace-item {{ index === 0 ? 'is-active' : '' }}">
+              <view class="trace-timeline">
+                <view class="trace-dot {{ index === 0 ? 'trace-dot--active' : '' }}"></view>
+                <view wx:if="{{ index < shipmentTrackingTraces.length - 1 }}" class="trace-line"></view>
+              </view>
+
+              <view class="trace-content">
+                <view class="trace-content__head">
+                  <text class="trace-text">{{ item.content }}</text>
+                  <text wx:if="{{ index === 0 }}" class="trace-tag">最新</text>
+                </view>
+                <text class="trace-time">{{ item.time }}</text>
+              </view>
+            </view>
+          </view>
+
+          <view wx:else class="empty-card">
+            <view class="empty-card__icon">
+              <van-icon name="logistics" size="34px" color="#666" />
+            </view>
+            <text class="empty-card__title">暂无物流轨迹</text>
+            <text class="empty-card__desc">{{ shipmentTrackingMessage || '物流公司接单后，最新轨迹会显示在这里。' }}</text>
+          </view>
+        </block>
+      </scroll-view>
+
+      <view class="detail-popup__footer">
+        <button class="tracking-popup__btn-confirm" bindtap="closeShipmentTrackingPopup">关闭</button>
+      </view>
+    </view>
+  </van-popup>
+</view>

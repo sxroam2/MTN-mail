@@ -1,0 +1,42 @@
+<!-- 支付结果页 -->
+<view class="page">
+  <view class="result-wrap">
+    <!-- 成功状态 -->
+    <block wx:if="{{ status === 'success' }}">
+      <van-icon name="checked" size="80px" color="#52c41a" />
+      <text class="result-title">支付成功</text>
+      <text class="result-desc">您的订单已支付成功，我们将尽快发货</text>
+    </block>
+
+    <!-- 失败/取消状态 -->
+    <block wx:else>
+      <van-icon name="warning-o" size="80px" color="#ff6a45" />
+      <text class="result-title">支付未完成</text>
+      <text class="result-desc">您可以在订单列表中继续支付</text>
+    </block>
+
+    <!-- 订单号 -->
+    <view wx:if="{{ orderNo }}" class="order-no-row">
+      <text class="order-no-label">订单号：</text>
+      <text class="order-no-value">{{ orderNo }}</text>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-btns">
+      <van-button
+        round
+        block
+        color="linear-gradient(90deg, #ff6a45, #ff4d4f)"
+        bindtap="viewOrder"
+      >查看订单</van-button>
+      <van-button
+        round
+        block
+        plain
+        color="#999"
+        custom-style="margin-top: 20rpx;"
+        bindtap="continueShopping"
+      >继续购物</van-button>
+    </view>
+  </view>
+</view>

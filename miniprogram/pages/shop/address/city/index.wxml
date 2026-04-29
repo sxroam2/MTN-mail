@@ -1,0 +1,81 @@
+<view class="page">
+  <view class="top-shell">
+    <van-search
+      value="{{ keyword }}"
+      placeholder="搜索城市"
+      shape="round"
+      background="transparent"
+      bind:change="onKeywordChange"
+      bind:clear="onKeywordClear"
+    />
+  </view>
+
+  <scroll-view scroll-y class="page-scroll">
+    <view class="panel current-panel">
+      <text class="panel-title">当前城市</text>
+      <view class="current-city-card" bindtap="selectCurrentCity">
+        <view class="current-city-badge">
+          <text class="current-city-badge-dot"></text>
+        </view>
+        <view class="current-city-copy">
+          <text class="current-city-name">{{ currentCity ? currentCity.name : '长沙市' }}</text>
+          <text class="current-city-desc">{{ currentCity ? '当前定位城市' : '默认城市' }}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="panel" wx:if="{{ hotCities.length }}">
+      <text class="panel-title">热门城市</text>
+      <view class="hot-grid">
+        <view
+          wx:for="{{ hotCities }}"
+          wx:key="code"
+          wx:for-item="city"
+          class="hot-pill {{ selectedCityCode === city.code ? 'hot-pill-active' : '' }}"
+          bindtap="selectCity"
+          data-code="{{ city.code }}"
+        >{{ city.name }}</view>
+      </view>
+    </view>
+
+    <view class="panel" wx:if="{{ !keyword && indexList.length }}">
+      <text class="panel-title">字母索引</text>
+      <scroll-view scroll-x class="index-scroll" enable-flex>
+        <view class="index-row">
+          <view
+            wx:for="{{ indexList }}"
+            wx:key="*this"
+            class="index-pill {{ activeInitial === item ? 'index-pill-active' : '' }}"
+            bindtap="selectInitial"
+            data-initial="{{ item }}"
+          >{{ item }}</view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="panel panel-list">
+      <text class="panel-title">{{ displayTitle }}</text>
+
+      <block wx:if="{{ displayCities.length }}">
+        <view class="group-body">
+          <view
+            wx:for="{{ displayCities }}"
+            wx:key="code"
+            wx:for-item="city"
+            class="city-row {{ selectedCityCode === city.code ? 'city-row-active' : '' }}"
+            bindtap="selectCity"
+            data-code="{{ city.code }}"
+          >
+            <text class="city-name">{{ city.name }}</text>
+            <text class="city-province">{{ city.province }}</text>
+          </view>
+        </view>
+      </block>
+
+      <view wx:else class="empty-wrap">
+        <van-icon name="search" size="44px" color="#666666" />
+        <text class="empty-text">未找到相关城市</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>

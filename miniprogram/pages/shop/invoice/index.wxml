@@ -1,0 +1,71 @@
+<view class="page">
+  <!-- 发票类型 + 抬头类型 -->
+  <view class="section-card">
+    <view class="section-title">发票类型</view>
+    <view class="invoice-tabs">
+      <view class="invoice-tab {{ form.invoiceType === '1' ? 'active' : '' }}" data-type="1" bindtap="switchInvoiceType">普通发票</view>
+      <view class="invoice-tab {{ form.invoiceType === '2' ? 'active' : '' }}" data-type="2" bindtap="switchInvoiceType">增值税专用发票</view>
+    </view>
+
+    <view class="invoice-subject-row">
+      <text class="invoice-subject-label">抬头类型</text>
+      <view class="invoice-subject-options">
+        <view wx:if="{{ form.invoiceType === '1' }}" class="invoice-radio {{ form.invoicePerson === '1' ? 'checked' : '' }}" data-subject="1" bindtap="switchInvoiceSubject">
+          <view class="radio-dot"></view>
+          <text>个人</text>
+        </view>
+        <view class="invoice-radio {{ form.invoicePerson === '2' || form.invoiceType === '2' ? 'checked' : '' }}" data-subject="2" bindtap="switchInvoiceSubject">
+          <view class="radio-dot"></view>
+          <text>企业</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 发票信息表单 -->
+  <view class="section-card">
+    <view class="invoice-form-row">
+      <text class="invoice-form-label">发票抬头</text>
+      <input class="invoice-form-input" placeholder="{{ form.invoicePerson === '1' ? '请输入个人姓名' : '请输入企业名称' }}" placeholder-class="invoice-form-placeholder" value="{{ form.title }}" data-field="title" bindinput="onFieldChange" />
+    </view>
+    <view class="invoice-form-row">
+      <text class="invoice-form-label">收票邮箱</text>
+      <input class="invoice-form-input" placeholder="用于向您发送电子发票" placeholder-class="invoice-form-placeholder" value="{{ form.email }}" data-field="email" bindinput="onFieldChange" />
+    </view>
+    <view wx:if="{{ form.invoiceType === '2' || form.invoicePerson === '2' }}" class="invoice-form-row">
+      <text class="invoice-form-label">企业税号</text>
+      <input class="invoice-form-input" placeholder="请输入纳税人识别号" placeholder-class="invoice-form-placeholder" value="{{ form.taxNo }}" data-field="taxNo" bindinput="onFieldChange" />
+    </view>
+    <view wx:if="{{ form.invoiceType === '2' }}" class="invoice-form-row">
+      <text class="invoice-form-label">注册地址</text>
+      <input class="invoice-form-input" placeholder="请输入企业注册地址" placeholder-class="invoice-form-placeholder" value="{{ form.registerAddress }}" data-field="registerAddress" bindinput="onFieldChange" />
+    </view>
+    <view wx:if="{{ form.invoiceType === '2' }}" class="invoice-form-row">
+      <text class="invoice-form-label">注册电话</text>
+      <input class="invoice-form-input" placeholder="请输入企业注册电话" placeholder-class="invoice-form-placeholder" value="{{ form.phone }}" data-field="phone" bindinput="onFieldChange" />
+    </view>
+    <view wx:if="{{ form.invoiceType === '2' }}" class="invoice-form-row">
+      <text class="invoice-form-label">开户银行</text>
+      <input class="invoice-form-input" placeholder="请输入开户银行" placeholder-class="invoice-form-placeholder" value="{{ form.bankName }}" data-field="bankName" bindinput="onFieldChange" />
+    </view>
+    <view wx:if="{{ form.invoiceType === '2' }}" class="invoice-form-row invoice-form-row--last">
+      <text class="invoice-form-label">银行账号</text>
+      <input class="invoice-form-input" placeholder="请输入银行账号" placeholder-class="invoice-form-placeholder" value="{{ form.bankAccount }}" data-field="bankAccount" bindinput="onFieldChange" />
+    </view>
+  </view>
+
+  <view class="tip-text">
+    <text>* 电子发票将在开票完成1-7个工作日发送至您的邮箱。</text>
+  </view>
+
+  <view class="save-btn-wrap">
+    <van-button
+      round
+      block
+      loading="{{ saving }}"
+      disabled="{{ loading || saving }}"
+      color="linear-gradient(90deg, #ff6a45, #ff4d4f)"
+      bindtap="saveInvoice"
+    >{{ mode === 'apply' ? '提交开票申请' : '保存' }}</van-button>
+  </view>
+</view>

@@ -1,0 +1,53 @@
+/* 支付结果页 - 深色风格 */
+.page {
+  min-height: 100vh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 60rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.result-title {
+  font-size: 36rpx;
+  color: #fff;
+  font-weight: 600;
+  margin-top: 30rpx;
+}
+
+.result-desc {
+  font-size: 26rpx;
+  color: #999;
+  margin-top: 16rpx;
+  text-align: center;
+}
+
+.order-no-row {
+  display: flex;
+  align-items: center;
+  margin-top: 30rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.order-no-label {
+  color: #999;
+}
+
+.order-no-value {
+  color: #ccc;
+}
+
+.action-btns {
+  width: 100%;
+  margin-top: 60rpx;
+  padding: 0 40rpx;
+}

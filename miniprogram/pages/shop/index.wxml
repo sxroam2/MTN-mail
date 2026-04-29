@@ -1,0 +1,110 @@
+<view class="page">
+  <!-- 顶部搜索栏 -->
+  <view class="search-bar" bindtap="goSearch">
+    <van-icon name="search" size="16px" color="#999" />
+    <text class="search-placeholder">搜索商品</text>
+  </view>
+
+  <!-- 主体：左侧分类导航 + 右侧商品列表 -->
+  <view class="main-wrap">
+    <!-- 左侧分类导航 -->
+    <scroll-view scroll-y class="sidebar" enhanced show-scrollbar="{{false}}">
+      <view
+        wx:for="{{ categories }}"
+        wx:key="*this"
+        class="sidebar-item {{ activeCategory === item ? 'active' : '' }}"
+        data-cat="{{ item }}"
+        bindtap="onCategoryTap"
+      >
+        <view wx:if="{{ activeCategory === item }}" class="sidebar-indicator"></view>
+        <text class="sidebar-text">{{ item }}</text>
+      </view>
+    </scroll-view>
+
+    <!-- 右侧商品列表 -->
+    <scroll-view scroll-y class="content" enhanced show-scrollbar="{{false}}">
+      <view wx:if="{{ loading }}" class="content-loading">
+        <van-loading size="36px" color="#ff6a45" vertical>加载中...</van-loading>
+      </view>
+
+      <view wx:elif="{{ products.length === 0 }}" class="empty-tip">
+        <van-icon name="search" size="60px" color="#666" />
+        <text class="empty-text">暂无相关商品</text>
+      </view>
+
+      <block wx:else>
+        <!-- 当前分类标题 -->
+        <view class="category-title">{{ activeCategory }}</view>
+
+        <!-- 商品列表 -->
+        <view class="product-list">
+          <view
+            wx:for="{{ products }}"
+            wx:key="id"
+            class="product-card"
+            bindtap="goToDetail"
+            data-id="{{ item.id }}"
+            hover-class="card-hover"
+          >
+            <!-- 左侧图片 -->
+            <view class="card-img-wrap">
+              <van-image
+                width="220rpx"
+                height="220rpx"
+                src="{{ item.img }}"
+                fit="cover"
+                radius="12rpx"
+                lazy-load
+              />
+              <!-- 售罄遮罩 -->
+              <view wx:if="{{ item.stock <= 0 }}" class="soldout-mask">
+                <text class="soldout-text">已售罄</text>
+              </view>
+            </view>
+
+            <!-- 右侧信息 -->
+            <view class="card-info">
+              <text class="card-title">{{ item.title }}</text>
+              <!-- 标签行 -->
+              <view class="card-tags">
+                <text wx:if="{{ item.isNew }}" class="tag tag-new">新品</text>
+                <text wx:if="{{ item.originalPrice && item.stock > 0 }}" class="tag tag-flash">限时价</text>
+              </view>
+              <view class="card-bottom">
+                <view class="card-price-row">
+                  <text class="card-price">¥{{ item.priceText }}</text>
+                  <text wx:if="{{ item.originalPriceText }}" class="card-original-price">¥{{ item.originalPriceText }}</text>
+                </view>
+              </view>
+              <!-- 购物车按钮（快速加购） -->
+              <view
+                class="card-cart-btn {{ item.stock <= 0 ? 'disabled' : '' }}"
+                catchtap="onQuickAdd"
+                data-id="{{ item.id }}"
+                data-index="{{ index }}"
+              >
+                <van-icon name="cart-o" size="14px" color="{{ item.stock <= 0 ? '#ff6a45' : '#ff6a45' }}" />
+              </view>
+            </view>
+          </view>
+        </view>
+
+
+      </block>
+    </scroll-view>
+  </view>
+
+  <!-- SKU 规格抽屉 -->
+  <sku-drawer
+    show="{{ showSku }}"
+    product="{{ skuProduct }}"
+    productName="{{ skuProduct.title }}"
+    packages="{{ skuPackages }}"
+    defaultThumbUrl="{{ skuProduct.img }}"
+    autoSelectFirst
+    loading="{{ skuAdding }}"
+    bind:close="closeSku"
+    bind:addcart="onSkuAddCart"
+    bind:buynow="onSkuBuyNow"
+  />
+</view>

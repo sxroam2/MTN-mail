@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+  },
+  "navigationBarTitleText": "后台配置",
+  "navigationBarBackgroundColor": "#0a0a0a",
+  "navigationBarTextStyle": "white"
+}

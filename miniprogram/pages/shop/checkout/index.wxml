@@ -1,0 +1,195 @@
+<view class="page">
+  <van-loading wx:if="{{ loading }}" size="36px" color="#ff6a45" vertical class="page-loading">加载中...</van-loading>
+
+  <block wx:else>
+    <!-- 收货地址 -->
+    <view class="glass-card address-card" bindtap="selectAddress">
+      <view class="addr-icon-wrap">
+        <van-icon name="location-o" size="22px" color="#ff6a45" />
+      </view>
+      <view class="addr-main">
+        <block wx:if="{{ address }}">
+          <view class="addr-top">
+            <text class="addr-name">{{ address.receiverName }}</text>
+            <text class="addr-phone">{{ address.receiverPhone }}</text>
+          </view>
+          <text class="addr-detail">{{ address.province }}{{ address.city }}{{ address.district }}{{ address.detailAddress }}</text>
+        </block>
+        <view wx:else class="addr-empty">
+          <text class="addr-empty-hint">暂未获取到收货地址</text>
+          <text class="addr-empty-text">请新建收货地址</text>
+        </view>
+      </view>
+      <van-icon name="arrow" size="16px" color="#666" />
+    </view>
+
+    <!-- 配送方式 -->
+    <view class="glass-card delivery-card">
+      <view class="delivery-left">
+        <van-icon name="logistics" size="20px" color="#999" />
+        <text class="delivery-label">物流</text>
+      </view>
+      <view class="delivery-right">
+        <text class="delivery-free">{{ shippingFee > 0 ? '¥' + shippingFee : '免运费' }} · 顺丰速运</text>
+      </view>
+    </view>
+
+    <!-- 商品列表 -->
+    <view class="product-list">
+      <view wx:for="{{ cartItems }}" wx:key="id" class="glass-card product-card">
+        <view class="product-img-wrap">
+          <van-image width="96px" height="96px" src="{{ item.imageUrl }}" fit="cover" radius="8rpx" />
+        </view>
+        <view class="product-info">
+          <view class="product-top">
+            <text class="product-name">{{ item.productName }}</text>
+            <text wx:if="{{ item.packageName }}" class="product-spec">{{ item.packageName }}</text>
+            <text wx:if="{{ item.description }}" class="product-desc">{{ item.description }}</text>
+          </view>
+          <view class="product-bottom">
+            <view class="product-price-wrap">
+              <text class="product-price">¥{{ item.price }}</text>
+              <text wx:if="{{ item.originalPrice && item.originalPrice > item.price }}" class="product-original-price">¥{{ item.originalPrice }}</text>
+            </view>
+            <text class="product-qty">x{{ item.quantity }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 订单备注 + 发票 -->
+    <view class="glass-card combined-card">
+      <view class="combined-row border-b">
+        <text class="combined-label">订单备注</text>
+        <input class="remark-input" placeholder="选填，请先和商家协商一致" placeholder-class="remark-placeholder" value="{{ remark }}" bindinput="onRemarkInput" maxlength="250" />
+      </view>
+      <view class="combined-row" bindtap="openInvoiceDrawer">
+        <text class="combined-label">发票信息</text>
+        <view class="combined-value-wrap">
+          <text class="combined-value">{{ invoice && invoice.title ? invoice.title : '不开发票' }}</text>
+          <van-icon name="arrow" size="14px" color="#666" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 价格明细 -->
+    <view class="glass-card price-card">
+      <view class="price-row">
+        <text class="price-label">原价</text>
+        <text class="price-val">¥{{ originalTotalAmount }}</text>
+      </view>
+      <view wx:if="{{ totalDiscount > 0 }}" class="price-row">
+        <text class="price-label">优惠</text>
+        <text class="price-val">-¥{{ totalDiscount }}</text>
+      </view>
+      <view class="price-row">
+        <text class="price-label">运费</text>
+        <text class="price-val">{{ shippingFee > 0 ? '¥' + shippingFee : '包邮' }}</text>
+      </view>
+      <view class="price-row total-row">
+        <text class="total-label">合计</text>
+        <text class="total-val">¥{{ payAmount }}</text>
+      </view>
+    </view>
+
+    <!-- 底部操作栏 -->
+    <view class="submit-bar">
+      <view class="submit-total">
+        <text class="submit-label">应付: </text>
+        <text class="submit-price">¥{{ payAmount }}</text>
+        <text wx:if="{{ originalTotalAmount > payAmount }}" class="submit-original-price">¥{{ originalTotalAmount }}</text>
+      </view>
+      <van-button round type="primary" color="linear-gradient(90deg, #ff6a45, #ff4d4f)" loading="{{ submitting }}" disabled="{{ submitting || !address }}" bindtap="submitOrder">提交订单</van-button>
+    </view>
+
+    <!-- 发票弹窗 -->
+    <view class="invoice-mask {{ invoiceDrawerVisible ? 'show' : '' }}" bindtap="closeInvoiceDrawer" catchtouchmove="noop"></view>
+    <view class="invoice-drawer {{ invoiceDrawerVisible ? 'show' : '' }}" catchtouchmove="noop">
+      <view class="invoice-header">
+        <view class="invoice-header-left">
+          <text class="invoice-title">发票</text>
+        </view>
+        <view class="invoice-header-help" bindtap="showInvoiceNotice">
+          <text>查看发票须知</text>
+          <van-icon name="info-o" size="14px" color="#999" />
+        </view>
+      </view>
+      <scroll-view scroll-y enhanced show-scrollbar="{{false}}" class="invoice-body">
+        <!-- 发票类型区域 -->
+        <view class="invoice-tabs">
+          <view class="invoice-tab {{ invoiceForm.type === 1 ? 'active' : '' }}" data-type="1" bindtap="switchInvoiceType">普通发票</view>
+          <view class="invoice-tab {{ invoiceForm.type === 2 ? 'active' : '' }}" data-type="2" bindtap="switchInvoiceType">增值税专用发票</view>
+        </view>
+
+        <block wx:if="{{ invoiceForm.type > 0 }}">
+          <!-- 抬头类型 -->
+          <view class="invoice-subject-row">
+            <text class="invoice-subject-label">抬头类型</text>
+            <view class="invoice-subject-options">
+              <view class="invoice-radio {{ invoiceForm.subject === 'corporate' ? 'checked' : '' }}" data-subject="corporate" bindtap="switchInvoiceSubject">
+                <view class="radio-dot"></view>
+                <text>企业</text>
+              </view>
+              <view wx:if="{{ invoiceForm.type === 1 }}" class="invoice-radio {{ invoiceForm.subject === 'personal' ? 'checked' : '' }}" data-subject="personal" bindtap="switchInvoiceSubject">
+                <view class="radio-dot"></view>
+                <text>个人</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 发票抬头 -->
+          <view class="invoice-form-row">
+            <text class="invoice-form-label">发票抬头</text>
+            <input class="invoice-form-input" placeholder="{{ invoiceForm.subject === 'personal' ? '请输入个人名称' : '请输入企业名称' }}" placeholder-class="invoice-form-placeholder" value="{{ invoiceForm.title }}" data-field="title" bindinput="onInvoiceFieldInput" />
+          </view>
+
+          <!-- 企业税号（企业时显示） -->
+          <block wx:if="{{ invoiceForm.subject === 'corporate' }}">
+            <view class="invoice-form-row">
+              <text class="invoice-form-label">企业税号</text>
+              <input class="invoice-form-input" placeholder="请输入企业税号" placeholder-class="invoice-form-placeholder" value="{{ invoiceForm.taxNo }}" data-field="taxNo" bindinput="onInvoiceFieldInput" />
+            </view>
+          </block>
+
+          <!-- 专用发票完整字段 -->
+          <block wx:if="{{ invoiceForm.type === 2 }}">
+            <view class="invoice-form-row">
+              <text class="invoice-form-label">开户银行</text>
+              <input class="invoice-form-input" placeholder="请输入开户银行" placeholder-class="invoice-form-placeholder" value="{{ invoiceForm.bankName }}" data-field="bankName" bindinput="onInvoiceFieldInput" />
+            </view>
+            <view class="invoice-form-row">
+              <text class="invoice-form-label">银行账号</text>
+              <input class="invoice-form-input" placeholder="请输入银行账号" placeholder-class="invoice-form-placeholder" value="{{ invoiceForm.bankAccount }}" data-field="bankAccount" bindinput="onInvoiceFieldInput" />
+            </view>
+            <view class="invoice-form-row">
+              <text class="invoice-form-label">企业地址</text>
+              <input class="invoice-form-input" placeholder="请输入企业地址" placeholder-class="invoice-form-placeholder" value="{{ invoiceForm.regAddress }}" data-field="regAddress" bindinput="onInvoiceFieldInput" />
+            </view>
+            <view class="invoice-form-row">
+              <text class="invoice-form-label">企业电话</text>
+              <input class="invoice-form-input" placeholder="请输入企业电话" placeholder-class="invoice-form-placeholder" value="{{ invoiceForm.regPhone }}" data-field="regPhone" bindinput="onInvoiceFieldInput" />
+            </view>
+          </block>
+
+          <!-- 收票信息 -->
+          <view class="invoice-form-row">
+            <text class="invoice-form-label">收票邮箱</text>
+            <input class="invoice-form-input" placeholder="用于向你发送电子发票" placeholder-class="invoice-form-placeholder" value="{{ invoiceForm.email }}" data-field="email" bindinput="onInvoiceFieldInput" />
+          </view>
+        </block>
+      </scroll-view>
+      <view class="invoice-footer">
+        <van-button round block color="linear-gradient(90deg, #ff6a45, #ff4d4f)" bindtap="saveInvoice">完成</van-button>
+      </view>
+    </view>
+
+    <!-- 发票须知弹窗 -->
+    <van-dialog use-slot show="{{ invoiceNoticeVisible }}" title="发票须知" confirm-button-text="我知道了" confirm-button-color="#ff6a45" bind:confirm="closeInvoiceNotice">
+      <view class="notice-content">
+        <view class="notice-item">1、电子发票是税局认可的有效收付款凭证，其法律效力、基本用途及使用规定同纸质发票，支持报销入账。如需纸质发票可自行下载打印。</view>
+        <view class="notice-item">2、如下单使用会员余额或礼品卡支付，则不提供发票。</view>
+        <view class="notice-item">3、如申请发票时填写发票抬头错误，请联系商家将发票冲红后再重新开票。</view>
+      </view>
+    </van-dialog>
+  </block>
+</view>

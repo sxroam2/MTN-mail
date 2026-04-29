@@ -1,0 +1,81 @@
+<view class="page">
+  <van-notice-bar
+    wx:if="{{ismessage && activeGauges.length > 1}}"
+    scrollable
+    color="#fff"
+    background="#ff6a456b"
+    text="向左或向右滑动可以切换不同类型的仪表盘。"
+  />
+
+  <view class="gauge-section">
+    <view class="gauge-container">
+      <swiper
+        class="gauge-swiper"
+        circular="{{false}}"
+        indicator-dots="{{false}}"
+        autoplay="{{false}}"
+        bindchange="onSwiperChange"
+        current="{{currentGaugeIndex}}"
+      >
+        <block wx:for="{{activeGauges}}" wx:key="key">
+          <swiper-item>
+            <view class="mychart">
+              <ec-canvas
+                wx:if="{{item.key === 'voltage' && currentGaugeIndex === index}}"
+                id="voltage-gauge-canvas"
+                canvas-id="voltage-gauge"
+                ec="{{voltageEc}}"
+              />
+              <ec-canvas
+                wx:if="{{item.key === 'current' && currentGaugeIndex === index}}"
+                id="current-gauge-canvas"
+                canvas-id="current-gauge"
+                ec="{{currentEc}}"
+              />
+              <ec-canvas
+                wx:if="{{item.key === 'pressure' && currentGaugeIndex === index}}"
+                id="pressure-gauge-canvas"
+                canvas-id="pressure-gauge"
+                ec="{{pressureEc}}"
+              />
+            </view>
+            <view class="gauge-label">
+              <text class="device-title">{{brand}} {{model}} - {{item.title}}</text>
+            </view>
+          </swiper-item>
+        </block>
+      </swiper>
+
+      <view class="gauge-dots" wx:if="{{activeGauges.length > 1}}">
+        <view wx:for="{{activeGauges}}" wx:key="key" class="dot {{currentGaugeIndex === index ? 'active' : ''}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="params-section">
+    <view class="empty-hint" wx:if="{{!currentGaugeMetrics.length}}">当前仪表盘暂无展示数据</view>
+
+    <block wx:for="{{currentGaugeMetrics}}" wx:key="key">
+      <view wx:if="{{item.displayType === 'grid'}}" class="cell-voltage-section">
+        <view class="cell-voltage-header">
+          <image class="param-icon" src="{{item.icon}}" mode="aspectFit" />
+          <text class="param-label">{{item.label}}</text>
+        </view>
+        <view class="cell-voltage-grid" style="grid-template-columns: repeat({{item.gridColumnCount}}, 1fr);">
+          <view class="cell-voltage-item" wx:for="{{item.gridItems}}" wx:key="label">
+            <text class="cell-number">{{item.label}}</text>
+            <text class="cell-voltage-value">{{item.value}}{{item.unit ? ' ' + item.unit : ''}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view wx:else class="param-item">
+        <view class="param-left">
+          <image class="param-icon" src="{{item.icon}}" mode="aspectFit" />
+          <text class="param-label">{{item.label}}</text>
+        </view>
+        <text class="param-value {{item.statusClass ? 'status-text' : ''}} {{item.statusClass}}">{{item.valueWithUnit}}</text>
+      </view>
+    </block>
+  </view>
+</view>

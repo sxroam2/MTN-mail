@@ -1,0 +1,346 @@
+page {
+	min-height: 100vh;
+	background: #060606;
+}
+
+.page {
+	min-height: 100vh;
+	padding: 28rpx 24rpx 40rpx;
+	box-sizing: border-box;
+}
+
+.section-card,
+.state-card {
+	background: linear-gradient(180deg, #171717 0%, #101010 100%);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 28rpx;
+	box-shadow: 0 14rpx 34rpx rgba(0, 0, 0, 0.24);
+}
+
+.page-toolbar {
+	display: flex;
+	justify-content: space-between;
+	display: flex;
+	align-items: center;
+	gap: 24rpx;
+}
+
+.toolbar-main {
+	min-width: 0;
+	flex: 1;
+}
+
+.toolbar-title {
+	display: block;
+	font-size: 32rpx;
+	font-weight: 600;
+	color: #ffffff;
+}
+
+.toolbar-subtitle {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 24rpx;
+	line-height: 1.6;
+	color: #8f8f8f;
+}
+
+.toolbar-refresh {
+	flex-shrink: 0;
+	padding: 14rpx 22rpx;
+	border-radius: 999rpx;
+	background: rgba(255, 106, 69, 0.14);
+	border: 1px solid rgba(255, 106, 69, 0.3);
+	color: #ff6a45;
+	font-size: 24rpx;
+}
+
+.state-card {
+	margin-top: 24rpx;
+	padding: 48rpx 32rpx;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+
+.state-title {
+	margin-top: 18rpx;
+	font-size: 32rpx;
+	font-weight: 600;
+	color: #ffffff;
+}
+
+.state-caption {
+	margin-top: 12rpx;
+	font-size: 24rpx;
+	color: #ffbeab;
+}
+
+.state-desc {
+	margin-top: 14rpx;
+	font-size: 24rpx;
+	line-height: 1.7;
+	color: #8f8f8f;
+}
+
+.section-card {
+	margin-top: 24rpx;
+	padding: 28rpx;
+}
+
+.section-head {
+	margin-bottom: 18rpx;
+}
+
+.section-head-toggle {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 20rpx;
+}
+
+.section-title {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 600;
+	color: #ffffff;
+}
+
+.section-desc {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 22rpx;
+	line-height: 1.6;
+	color: #8f8f8f;
+}
+
+.section-empty {
+	display: block;
+	font-size: 24rpx;
+	color: #8f8f8f;
+	line-height: 1.7;
+}
+
+.toggle-pill {
+	flex-shrink: 0;
+	padding: 12rpx 20rpx;
+	border-radius: 999rpx;
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	font-size: 22rpx;
+	color: #d1d5db;
+}
+
+.compact-block {
+	margin-top: 20rpx;
+}
+
+.compact-label {
+	display: block;
+	margin-bottom: 14rpx;
+	font-size: 24rpx;
+	font-weight: 500;
+	color: #ffffff;
+}
+
+.tag-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12rpx;
+  margin-top: 10rpx;
+}
+
+.tag-chip,
+.subtle-chip {
+	padding: 10rpx 18rpx;
+	border-radius: 999rpx;
+	font-size: 22rpx;
+	line-height: 1;
+}
+
+.tag-chip {
+	background: rgba(255, 106, 69, 0.12);
+	color: #ffbeab;
+	border: 1px solid rgba(255, 106, 69, 0.24);
+}
+
+.tag-chip-muted {
+	background: rgba(255, 255, 255, 0.05);
+	color: #d1d5db;
+	border-color: rgba(255, 255, 255, 0.08);
+}
+
+.subtle-chip {
+	background: rgba(255, 255, 255, 0.04);
+	color: #8f8f8f;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-tabs {
+	white-space: nowrap;
+}
+
+.profile-tabs-inner {
+	display: inline-flex;
+	gap: 14rpx;
+	padding-bottom: 6rpx;
+}
+
+.profile-tab {
+	min-width: 220rpx;
+	padding: 18rpx 20rpx;
+	border-radius: 22rpx;
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	box-sizing: border-box;
+}
+
+.profile-tab.active {
+	background: rgba(255, 106, 69, 0.12);
+	border-color: rgba(255, 106, 69, 0.28);
+}
+
+.profile-tab-title {
+	display: block;
+	font-size: 24rpx;
+	font-weight: 500;
+	color: #ffffff;
+}
+
+.profile-tab-meta {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 20rpx;
+	color: #8f8f8f;
+}
+
+.profile-detail-card {
+	margin-top: 20rpx;
+	padding-top: 20rpx;
+	border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.profile-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 20rpx;
+}
+
+.profile-title-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12rpx;
+	align-items: center;
+}
+
+.profile-title {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #ffffff;
+}
+
+.profile-badge {
+	padding: 6rpx 14rpx;
+	border-radius: 999rpx;
+	background: rgba(255, 106, 69, 0.14);
+	color: #ff6a45;
+	font-size: 20rpx;
+}
+
+.profile-meta {
+	font-size: 22rpx;
+	color: #8f8f8f;
+}
+
+.gauge-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12rpx;
+	margin-top: 16rpx;
+}
+
+.gauge-chip {
+	min-width: 170rpx;
+	padding: 14rpx 18rpx;
+	border-radius: 20rpx;
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.gauge-chip-hover {
+	border-color: rgba(255, 106, 69, 0.18);
+}
+
+.gauge-chip.active {
+	background: rgba(255, 106, 69, 0.12);
+	border-color: rgba(255, 106, 69, 0.28);
+}
+
+.gauge-chip.active .gauge-chip-title {
+	color: #ffdfd5;
+}
+
+.gauge-chip.active .gauge-chip-meta {
+	color: #ffbeab;
+}
+
+.gauge-chip-title {
+	display: block;
+	font-size: 24rpx;
+	color: #ffffff;
+}
+
+.gauge-chip-meta {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 20rpx;
+	color: #8f8f8f;
+}
+
+.protocol-list {
+	margin-top: 16rpx;
+	max-height: 520rpx;
+}
+
+.protocol-item {
+	padding: 16rpx 18rpx;
+	border-radius: 20rpx;
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	margin-bottom: 10rpx;
+}
+
+.protocol-item:last-child {
+	margin-bottom: 0;
+}
+
+.protocol-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 16rpx;
+	flex-wrap: wrap;
+}
+
+.protocol-row-secondary {
+	margin-top: 10rpx;
+}
+
+.protocol-label {
+	font-size: 24rpx;
+	color: #ffffff;
+	font-weight: 500;
+}
+
+.protocol-parser,
+.protocol-note {
+	font-size: 20rpx;
+	color: #8f8f8f;
+}
+
+.protocol-code {
+	font-size: 22rpx;
+	color: #ffbeab;
+}

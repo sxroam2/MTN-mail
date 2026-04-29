@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "ec-canvas": "../../components/ec-canvas/ec-canvas"
+  },
+  "navigationBarTitleText": "设备信息",
+  "navigationBarBackgroundColor": "#0a0a0a",
+  "navigationBarTextStyle": "white"
+}

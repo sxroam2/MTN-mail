@@ -1,0 +1,165 @@
+<!-- pages/admin/config.wxml -->
+<view class="config-page">
+
+  <!-- 标签页 -->
+  <view class="config-tabs">
+    <view 
+      class="tab-item {{activeTab === 'home' ? 'active' : ''}}" 
+      data-tab="home"
+      bindtap="switchTab"
+    >
+      首页配置
+    </view>
+    <view 
+      class="tab-item {{activeTab === 'carousel' ? 'active' : ''}}" 
+      data-tab="carousel"
+      bindtap="switchTab"
+    >
+      轮播图管理
+    </view>
+  </view>
+
+  <!-- 首页配置内容 -->
+  <view class="tab-content" wx:if="{{activeTab === 'home'}}">
+    <!-- 首页标题配置 -->
+    <view class="config-card">
+      <view class="card-header">
+        <text class="card-title">首页标题</text>
+      </view>
+      <view class="card-content">
+        <view class="input-group">
+          <input 
+            class="config-input"
+            value="{{homeTitle}}"
+            bindinput="onHomeTitleInput"
+            placeholder="请输入首页标题"
+            placeholder-class="placeholder"
+          />
+          <van-button 
+            type="primary" 
+            size="small" 
+            bindtap="saveHomeTitle"
+            custom-class="save-btn"
+          >保存</van-button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 默认设备图片配置 -->
+    <view class="config-card">
+      <view class="card-header">
+        <text class="card-title">默认设备图片</text>
+      </view>
+      <view class="card-content">
+        <view class="image-preview">
+          <image src="{{defaultDeviceImage}}" mode="aspectFit" class="preview-image"></image>
+        </view>
+        <view class="image-actions">
+          <van-button 
+            type="primary" 
+            size="small" 
+            bindtap="chooseDefaultDeviceImage"
+            custom-class="action-btn"
+          >更换图片</van-button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 轮播图管理内容 -->
+  <view class="tab-content" wx:if="{{activeTab === 'carousel'}}">
+    <!-- 添加按钮 -->
+    <view class="add-btn-wrapper">
+      <van-button 
+        type="primary" 
+        size="small" 
+        bindtap="addCarousel"
+        custom-class="add-carousel-btn"
+      >+ 添加轮播图</van-button>
+    </view>
+
+    <!-- 轮播图列表 -->
+    <view class="carousel-list">
+      <view class="carousel-item" wx:for="{{carouselData}}" wx:key="index" wx:for-index="index">
+        <view class="carousel-index">{{index + 1}}</view>
+        <image src="{{item.imageUrl}}" mode="aspectFill" class="carousel-preview"></image>
+        <view class="carousel-info">
+          <text class="carousel-model">{{item.model}}</text>
+        </view>
+        <view class="carousel-actions">
+          <view class="action-buttons">
+            <van-icon name="edit" size="18" color="#0089ff" bindtap="editCarousel" data-index="{{index}}" />
+            <van-icon name="delete" size="18" color="#ff4444" bindtap="deleteCarousel" data-index="{{index}}" />
+          </view>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{carouselData.length === 0}}">
+        <van-icon name="photo-fail" size="48" color="#999" />
+        <text class="empty-text">暂无轮播图，点击上方按钮添加</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 轮播图编辑弹窗 -->
+  <van-popup 
+    show="{{showCarouselDialog}}" 
+    position="center" 
+    custom-style="width: 85%; border-radius: 24rpx; background-color: #1a1a1a;"
+    close-on-click-overlay="false"
+    bind:close="closeCarouselDialog"
+  >
+    <view class="popup-header">
+      <text class="popup-title">{{currentCarouselIndex === -1 ? '添加轮播图' : '编辑轮播图'}}</text>
+      <van-icon name="cross" size="18" color="#999" bindtap="closeCarouselDialog" />
+    </view>
+
+    <view class="popup-content">
+      <!-- 图片选择 -->
+      <view class="popup-item">
+        <view class="popup-item-left">
+          <image class="popup-avatar" src="/assets/chanpingIMG.png" mode="aspectFill"></image>
+          <text>产品图片</text>
+        </view>
+        <view class="popup-item-right">
+          <view class="image-selector" bindtap="chooseCarouselImage">
+            <image wx:if="{{carouselForm.image}}" src="{{carouselForm.image}}" mode="aspectFill" class="selected-image"></image>
+            <block wx:else>
+              <van-icon name="plus" size="20" color="#FF7500" />
+              <text>选择图片</text>
+            </block>
+          </view>
+        </view>
+      </view>
+
+      <!-- 型号输入 -->
+      <view class="popup-item">
+        <view class="popup-item-left">
+          <image class="popup-avatar" src="/assets/chanpingNAME.png" mode="aspectFill"></image>
+          <text>产品型号</text>
+        </view>
+        <view class="popup-item-right">
+          <input 
+            type="text" 
+            value="{{carouselForm.model}}"
+            bindinput="onCarouselModelInput"
+            placeholder="请输入型号"
+            placeholder-class="placeholder"
+            style="font-size:15px; color:#fff; background: transparent; border: none; outline: none; text-align: right;" 
+          />
+        </view>
+      </view>
+
+      <!-- 保存按钮 -->
+      <view class="popup-buttons" style="justify-content: flex-end;">
+        <van-button 
+          type="primary" 
+          size="small" 
+          bindtap="saveCarousel"
+          custom-class="confirm-btn"
+        >保存</van-button>
+      </view>
+    </view>
+  </van-popup>
+</view>

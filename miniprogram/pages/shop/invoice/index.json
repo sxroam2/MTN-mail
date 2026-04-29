@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "发票信息",
+  "navigationBarBackgroundColor": "#0a0a0a",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "van-button": "@vant/weapp/button/index"
+  }
+}

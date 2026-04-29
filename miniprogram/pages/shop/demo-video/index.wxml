@@ -1,0 +1,76 @@
+<view class="page">
+	<view class="tools-panel">
+		<view class="search-box">
+			<van-icon name="search" size="18px" color="#7a7a7a" />
+			<input
+				class="search-input"
+				type="text"
+				value="{{ searchKeyword }}"
+				placeholder="搜索型号 / 视频标题"
+				placeholder-class="search-placeholder"
+				confirm-type="search"
+				bindinput="onSearchInput"
+			/>
+			<view wx:if="{{ searchKeyword }}" class="search-clear" bindtap="onSearchClear">
+				<van-icon name="cross" size="14px" color="#7a7a7a" />
+			</view>
+		</view>
+
+		<view class="layout-icon-btn layout-icon-btn-{{ layoutMode }}" bindtap="onLayoutChange">
+			<van-icon wx:if="{{ layoutMode === 'double' }}" name="apps-o" size="22px" color="#ff6a45" />
+			<van-icon wx:else name="list-switch" size="22px" color="#ff6a45" />
+		</view>
+	</view>
+
+	<scroll-view class="tab-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+		<view class="tab-list">
+			<view
+				wx:for="{{ categoryTabs }}"
+				wx:key="itemKey"
+				class="tab-pill {{ activeCategory === item.itemKey ? 'active' : '' }}"
+				data-key="{{ item.itemKey }}"
+				bindtap="onCategoryTap"
+			>
+				<text>{{ item.title }}</text>
+			</view>
+		</view>
+	</scroll-view>
+
+	<view wx:if="{{ loading }}" class="page-loading">
+		<van-loading size="36px" color="#ff6a45" vertical>加载中...</van-loading>
+	</view>
+
+	<view wx:elif="{{ videoCards.length === 0 }}" class="empty-state">
+		<van-icon name="video-o" size="58px" color="#ff6a45" />
+		<text class="empty-title">{{ searchKeyword ? '未找到匹配视频' : (activeCategory !== 'all' ? '当前分类暂无视频' : '暂无演示视频') }}</text>
+		<text class="empty-desc">{{ searchKeyword ? '试试其他型号或视频标题' : 'O.O 啥也没有~' }}</text>
+	</view>
+
+	<view wx:else class="video-grid {{ layoutMode === 'single' ? 'single-mode' : 'double-mode' }}">
+		<view
+			wx:for="{{ videoCards }}"
+			wx:key="itemKey"
+			class="video-card"
+			bindtap="openVideoDetail"
+			data-key="{{ item.itemKey }}"
+			hover-class="video-card-hover"
+		>
+			<view class="card-cover-wrap">
+				<image wx:if="{{ item.coverUrl }}" class="card-cover" src="{{ item.coverUrl }}" mode="aspectFill" lazy-load />
+				<view wx:else class="card-cover card-cover-placeholder">
+					<van-icon name="photo-o" size="26px" color="#ff6a45" />
+				</view>
+				<view class="card-gradient"></view>
+				<view class="card-play-center">
+					<van-icon name="play-circle-o" size="32px" color="#ffffff" />
+				</view>
+				<text wx:if="{{ item.duration }}" class="card-duration">{{ item.duration }}</text>
+			</view>
+
+			<view class="card-body">
+				<text class="card-title">{{ item.title }}</text>
+				<text wx:if="{{ item.description }}" class="card-desc">{{ item.description }}</text>
+			</view>
+		</view>
+	</view>
+</view>

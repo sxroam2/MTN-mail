@@ -1,0 +1,500 @@
+/* 覆盖 app.wxss 全局 fixed，恢复页面滚动 */
+page {
+  position: static !important;
+  height: auto !important;
+  overflow-y: auto !important;
+}
+
+/* 结算页 - 1:1 复刻 code.html 设计稿 */
+.page {
+  min-height: 100vh;
+  background: #000;
+  padding: 20rpx 24rpx;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 180rpx);
+}
+.page-loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  background: #000;
+  z-index: 10;
+}
+
+/* Glass Card 通用卡片 */
+.glass-card {
+  background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+/* 地址卡片 */
+.address-card {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  padding: 28rpx;
+}
+.addr-icon-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: rgba(255, 106, 69, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.addr-main {
+  flex: 1;
+  min-width: 0;
+}
+.addr-top {
+  display: flex;
+  gap: 16rpx;
+  align-items: baseline;
+  margin-bottom: 8rpx;
+}
+.addr-name {
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: bold;
+}
+.addr-phone {
+  font-size: 24rpx;
+  color: #999;
+}
+.addr-detail {
+  font-size: 24rpx;
+  color: #ccc;
+  line-height: 1.4;
+}
+.addr-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+.addr-empty-hint {
+  font-size: 24rpx;
+  color: #999;
+}
+.addr-empty-text {
+  font-size: 30rpx;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 配送方式 */
+.delivery-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 28rpx;
+  border-bottom: 1rpx solid #222;
+}
+.delivery-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.delivery-label {
+  font-size: 28rpx;
+  color: #fff;
+}
+.delivery-right {
+  display: flex;
+  align-items: center;
+}
+.delivery-free {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 商品列表 */
+.product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+.product-card {
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx;
+  margin-bottom: 0;
+}
+.product-img-wrap {
+  width: 192rpx;
+  height: 192rpx;
+  flex-shrink: 0;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: #1c1b1b;
+}
+.product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+.product-top {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+.product-name {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: bold;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.product-spec {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.product-desc {
+  font-size: 22rpx;
+  color: #7a7a7a;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.product-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.product-price-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+}
+.product-price {
+  font-size: 32rpx;
+  color: #ff6a45;
+  font-weight: 800;
+}
+.product-original-price {
+  font-size: 22rpx;
+  color: #666;
+  text-decoration: line-through;
+}
+.product-qty {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 组合卡片（订单备注 + 发票 + 优惠券） */
+.combined-card {
+  padding: 0;
+  overflow: hidden;
+}
+.combined-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx;
+}
+.combined-row.border-b {
+  border-bottom: 1rpx solid #222;
+}
+.combined-label {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: 600;
+  width: 160rpx;
+  flex-shrink: 0;
+}
+.remark-input {
+  flex: 1;
+  font-size: 26rpx;
+  color: #ccc;
+  text-align: left;
+  margin-left: 20rpx;
+}
+.remark-placeholder {
+  color: #666;
+}
+.combined-value-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+.combined-value {
+  font-size: 26rpx;
+  color: #999;
+}
+.coupon-selected {
+  color: #ff4d4f;
+  font-weight: 500;
+}
+
+/* 价格明细 */
+.price-card {
+  padding: 28rpx;
+}
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8rpx 0;
+}
+.price-label {
+  font-size: 24rpx;
+  color: #999;
+}
+.price-val {
+  font-size: 26rpx;
+  color: #fff;
+}
+.total-row {
+  margin-top: 16rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #222;
+  align-items: baseline;
+}
+.total-label {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: bold;
+}
+.total-val {
+  font-size: 40rpx;
+  color: #ff6a45;
+  font-weight: 800;
+}
+
+/* 底部操作栏 */
+.submit-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 32rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(10, 10, 10, 0.9);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-top: 1rpx solid #222;
+  z-index: 50;
+}
+.submit-total {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+}
+.submit-label {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: bold;
+}
+.submit-price {
+  font-size: 40rpx;
+  color: #ff6a45;
+  font-weight: 800;
+}
+.submit-original-price {
+  font-size: 24rpx;
+  color: #999;
+  text-decoration: line-through;
+}
+
+/* 发票弹窗 */
+.invoice-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 60;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease;
+}
+.invoice-mask.show {
+  opacity: 1;
+  visibility: visible;
+}
+.invoice-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1a1a1a;
+  border-radius: 24rpx 24rpx 0 0;
+  height: 800rpx;
+  display: flex;
+  flex-direction: column;
+  z-index: 61;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+.invoice-drawer.show {
+  transform: translateY(0);
+}
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28rpx 32rpx;
+  flex-shrink: 0;
+}
+.invoice-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+.invoice-title {
+  font-size: 30rpx;
+  color: #fff;
+  font-weight: bold;
+}
+.invoice-header-help {
+  font-size: 22rpx;
+  color: #999;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+.invoice-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 32rpx;
+}
+
+/* 发票类型 tabs - 横向圆角标签 */
+.invoice-tabs {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+.invoice-tab {
+  padding: 12rpx 32rpx;
+  font-size: 26rpx;
+  border: 1rpx solid #333;
+  border-radius: 40rpx;
+  background: transparent;
+  color: #999;
+  white-space: nowrap;
+}
+.invoice-tab.active {
+  background: transparent;
+  border-color: #ff6a45;
+  color: #ff6a45;
+}
+
+/* 抬头类型 - 横排 radio */
+.invoice-subject-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+.invoice-subject-label {
+  font-size: 28rpx;
+  color: #333;
+  color: #fff;
+  width: 140rpx;
+  flex-shrink: 0;
+}
+.invoice-subject-options {
+  display: flex;
+  gap: 48rpx;
+}
+.invoice-radio {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  font-size: 26rpx;
+  color: #ccc;
+}
+.invoice-radio .radio-dot {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  border: 3rpx solid #444;
+  position: relative;
+  box-sizing: border-box;
+}
+.invoice-radio.checked {
+  color: #fff;
+}
+.invoice-radio.checked .radio-dot {
+  border-color: #ff6a45;
+}
+.invoice-radio.checked .radio-dot::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: #ff6a45;
+}
+
+/* 发票表单 - 横排 label + input */
+.invoice-form-row {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #333;
+}
+.invoice-form-label {
+  font-size: 26rpx;
+  color: #fff;
+  width: 140rpx;
+  flex-shrink: 0;
+}
+.invoice-form-input {
+  flex: 1;
+  font-size: 26rpx;
+  color: #fff;
+  background: transparent;
+  border: none;
+}
+.invoice-form-placeholder {
+  color: #666;
+}
+
+/* 收票信息区域 */
+.invoice-receipt-section {
+  margin-top: 40rpx;
+}
+
+.invoice-footer {
+  padding: 20rpx 32rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  flex-shrink: 0;
+  background: #1a1a1a;
+}
+
+/* 发票抬头标签高亮 */
+.invoice-form-label-highlight {
+  color: #ff6a45;
+}
+
+/* 发票须知弹窗 */
+.notice-content {
+  padding: 24rpx 32rpx 32rpx;
+}
+.notice-item {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.8;
+  margin-bottom: 12rpx;
+}

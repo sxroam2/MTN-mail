@@ -1,0 +1,246 @@
+page {
+  position: inherit !important;
+}
+
+.bluetooth-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  background: transparent;
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20rpx;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.status-summary {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #8f8f8f;
+}
+
+.action-bar {
+  display: flex;
+  gap: 16rpx;
+  flex-wrap: wrap;
+}
+
+.action-bar van-button {
+  flex: 1;
+  min-width: 220rpx;
+}
+
+.surface-card {
+  background: linear-gradient(180deg, #171717 0%, #101010 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24rpx;
+  padding: 24rpx;
+  box-shadow: 0 14rpx 30rpx rgba(0, 0, 0, 0.22);
+}
+
+.device-box,
+.connection-box,
+.receive-box,
+.log-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.connection-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18rpx;
+  font-size: 26rpx;
+  color: #ffffff;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.hint {
+  font-size: 22rpx;
+  color: #8f8f8f;
+  font-weight: normal;
+}
+
+.receive-actions,
+.log-actions {
+  display: flex;
+  align-items: center;
+}
+
+.device-list {
+  max-height: 440rpx;
+}
+
+.device-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22rpx 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background-color 0.2s ease;
+}
+
+.device-item:last-child {
+  border-bottom: none;
+}
+
+.device-item:active {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.device-item.connected {
+  background-color: rgba(255, 106, 69, 0.08);
+}
+
+.device-item-static {
+  padding: 6rpx 0 0;
+  border-bottom: none;
+}
+
+.device-item-static:active {
+  background-color: transparent;
+}
+
+.device-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.device-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.device-id {
+  font-size: 20rpx;
+  color: #8f8f8f;
+}
+
+.device-status {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.message-list {
+  max-height: 620rpx;
+}
+
+.message-item {
+  margin-bottom: 16rpx;
+  padding: 20rpx;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20rpx;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.message-type {
+  font-size: 22rpx;
+  color: #ff6a45;
+  font-weight: 500;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.data-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  font-size: 22rpx;
+  flex-wrap: wrap;
+}
+
+.data-label {
+  color: #9ca3af;
+  min-width: 110rpx;
+}
+
+.data-value {
+  color: #f5f5f5;
+  font-family: monospace;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4rpx 10rpx;
+  border-radius: 12rpx;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.frame-value {
+  word-break: break-all;
+}
+
+.cmd-desc,
+.checksum-desc {
+  color: #8f8f8f;
+  font-size: 20rpx;
+}
+
+.parsed-value {
+  color: #ffbeab;
+}
+
+.frame-structure {
+  margin-top: 10rpx;
+  padding-top: 10rpx;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.checksum-row {
+  align-items: center;
+}
+
+.log-list {
+  max-height: 520rpx;
+}
+
+.log-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10rpx;
+  font-size: 22rpx;
+}
+
+.log-text {
+  color: #d1d5db;
+  flex: 1;
+  line-height: 1.6;
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

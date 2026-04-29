@@ -1,0 +1,122 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/shop/index",
+    "pages/shop/product-detail/index",
+    "pages/shop/cart/index",
+    "pages/shop/checkout/index",
+    "pages/shop/order-list/index",
+    "pages/shop/order-detail/index",
+    "pages/shop/address/index",
+    "pages/shop/address/form/index",
+    "pages/shop/address/location/index",
+    "pages/shop/address/city/index",
+    "pages/shop/pay-result/index",
+    "pages/shop/invoice/index",
+    "pages/shop/logistics/index",
+    "pages/shop/search/index",
+    "pages/shop/demo-video/index",
+    "pages/shop/demo-video/detail/index",
+    "pages/shop/refund-apply/index",
+    "pages/shop/refund-detail/index",
+    "pages/debug/debug",
+    "pages/bar/index",
+    "pages/equipment/equipment",
+    "pages/message/message"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#000",
+    "enablePullDownRefresh": false
+  },
+  "requiredPrivateInfos": [
+    "chooseAddress",
+    "getFuzzyLocation"
+  ],
+  "permission": {
+    "scope.userFuzzyLocation": {
+      "desc": "用于定位当前位置和辅助填写收货地址"
+    }
+  },
+  "tabBar": {
+    "selectedColor": "#ff6a45",
+    "color": "#9D9F9E",
+    "backgroundColor": "#212322",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "/assets/home.png",
+        "selectedIconPath": "/assets/home-active.png"
+      },
+      {
+        "pagePath": "pages/shop/index",
+        "text": "分类",
+        "iconPath": "/assets/classification.png",
+        "selectedIconPath": "/assets/classification-active.png"
+      },
+      {
+        "pagePath": "pages/shop/cart/index",
+        "text": "购物车",
+        "iconPath": "/assets/shoppingcart.png",
+        "selectedIconPath": "/assets/shoppingcart-active.png"
+      },
+      {
+        "pagePath": "pages/bar/index",
+        "text": "我的",
+        "iconPath": "/assets/bar.png",
+        "selectedIconPath": "/assets/bar-active.png"
+      }
+    ]
+  },
+  "rendererOptions": {
+    "skyline": {
+      "defaultDisplayBlock": true,
+      "defaultContentBox": true,
+      "tagNameStyleIsolation": "legacy",
+      "disableABTest": true,
+      "sdkVersionBegin": "3.0.0",
+      "sdkVersionEnd": "15.255.255"
+    }
+  },
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "usingComponents": {
+    "van-button": "@vant/weapp/button/index",
+    "van-tag": "@vant/weapp/tag/index",
+    "van-icon": "@vant/weapp/icon/index",
+    "van-empty": "@vant/weapp/empty/index",
+    "van-tab": "@vant/weapp/tab/index",
+    "van-tabs": "@vant/weapp/tabs/index",
+    "van-popup": "@vant/weapp/popup/index",
+    "van-field": "@vant/weapp/field/index",
+    "van-notice-bar": "@vant/weapp/notice-bar/index",
+    "van-card": "@vant/weapp/card/index",
+    "van-cell": "@vant/weapp/cell/index",
+    "van-cell-group": "@vant/weapp/cell-group/index",
+    "van-stepper": "@vant/weapp/stepper/index",
+    "van-submit-bar": "@vant/weapp/submit-bar/index",
+    "van-goods-action": "@vant/weapp/goods-action/index",
+    "van-goods-action-icon": "@vant/weapp/goods-action-icon/index",
+    "van-goods-action-button": "@vant/weapp/goods-action-button/index",
+    "van-search": "@vant/weapp/search/index",
+    "van-skeleton": "@vant/weapp/skeleton/index",
+    "van-loading": "@vant/weapp/loading/index",
+    "van-image": "@vant/weapp/image/index",
+    "van-grid": "@vant/weapp/grid/index",
+    "van-grid-item": "@vant/weapp/grid-item/index",
+    "van-divider": "@vant/weapp/divider/index",
+    "van-action-sheet": "@vant/weapp/action-sheet/index",
+    "van-dialog": "@vant/weapp/dialog/index",
+    "van-toast": "@vant/weapp/toast/index",
+    "van-swipe-cell": "@vant/weapp/swipe-cell/index",
+    "van-checkbox": "@vant/weapp/checkbox/index",
+    "van-checkbox-group": "@vant/weapp/checkbox-group/index",
+    "van-radio": "@vant/weapp/radio/index",
+    "van-radio-group": "@vant/weapp/radio-group/index",
+    "van-steps": "@vant/weapp/steps/index",
+    "van-switch": "@vant/weapp/switch/index"
+  },
+  "component": true
+}
