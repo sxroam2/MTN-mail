@@ -1450,12 +1450,10 @@ Page({
 
   uploadEvidenceFile: function (file) {
     var that = this
-    var fileList = (that.data.fileList || []).slice()
-    var index = fileList.findIndex(function (item) {
-      return item.url === file.url && item.status === 'uploading'
-    })
+    // 不在调用时快照 fileList——多文件并发上传时各自完成后从 that.data 读取最新状态，避免互相覆盖
+    var fileUrl = file.url
 
-    api.uploadFile('/api/orders/after-sales/upload-evidence', file.url, 'file').then(function (res) {
+    api.uploadFile('/api/orders/after-sales/upload-evidence', fileUrl, 'file').then(function (res) {
       var payload = res || {}
       var code = typeof payload.code === 'number'
         ? payload.code
@@ -1467,8 +1465,14 @@ Page({
         throw new Error(message)
       }
 
-      var remoteUrl = payload.data || payload.Data || payload.url || file.url
+      var remoteUrl = payload.data || payload.Data || payload.url || fileUrl
       var previewUrl = imageUtil.resolveImageUrl(remoteUrl)
+
+      // 每次完成时读取最新 fileList，防止并发覆盖
+      var fileList = (that.data.fileList || []).slice()
+      var index = fileList.findIndex(function (item) {
+        return item.url === fileUrl && item.status === 'uploading'
+      })
       if (index >= 0) {
         fileList[index] = {
           url: previewUrl,
@@ -1488,9 +1492,14 @@ Page({
         evidenceImageUrls: evidenceImageUrls
       })
     }).catch(function (err) {
+      // 失败时同样从最新状态读取
+      var fileList = (that.data.fileList || []).slice()
+      var index = fileList.findIndex(function (item) {
+        return item.url === fileUrl && item.status === 'uploading'
+      })
       if (index >= 0) {
         fileList[index] = {
-          url: file.url,
+          url: fileUrl,
           status: 'failed',
           message: '上传失败'
         }

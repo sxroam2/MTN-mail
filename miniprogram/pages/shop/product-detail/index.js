@@ -210,13 +210,9 @@ Page({
       return
     }
 
-    wx.pageScrollTo({
-      selector: '#anchor-' + section,
-      duration: 300,
-      fail: function () {
-        that.scrollToSectionByKey(section, 0)
-      }
-    })
+    // 使用手动坐标计算方式，比 wx.pageScrollTo({ selector }) 更可靠
+    // 避免吸顶菜单刚出现时（CSS 过渡尚未完成）selector 方式首次定位偏差
+    this.scrollToSectionByKey(section, 0)
   },
 
   scrollToSectionByKey: function (section, retryCount) {
