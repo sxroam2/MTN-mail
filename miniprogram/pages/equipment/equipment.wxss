@@ -201,6 +201,11 @@ page {
   flex-shrink: 0;
 }
 
+.device-status {
+  flex: 1;
+  min-width: 0;
+}
+
 .device-count {
   font-size: 26rpx;
   color: #ff6a45;
@@ -290,10 +295,81 @@ page {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80rpx 0;
+  padding: 92rpx 0;
   color: #999;
   font-size: 26rpx;
-  gap: 20rpx;
+  gap: 24rpx;
+}
+
+.loading-spinner {
+  width: 96rpx;
+  height: 96rpx;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner-ring {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 6rpx solid rgba(255, 106, 69, 0.15);
+  border-top-color: #ff6a45;
+  border-right-color: rgba(255, 77, 79, 0.88);
+  animation: loading-spin 0.9s linear infinite;
+}
+
+.loading-text {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  color: #cfcfcf;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
+.loading-dot {
+  display: inline-block;
+  width: 12rpx;
+  text-align: center;
+  color: #cfcfcf;
+  opacity: 0.2;
+  animation: loading-dot 1.2s ease-in-out infinite;
+}
+
+.loading-dot-2 {
+  animation-delay: 0.2s;
+}
+
+.loading-dot-3 {
+  animation-delay: 0.4s;
+}
+
+@keyframes loading-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loading-dot {
+  0%,
+  20% {
+    opacity: 0.18;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3rpx);
+  }
+  100% {
+    opacity: 0.18;
+    transform: translateY(0);
+  }
 }
 
 /* 在 equipment.wxss 中添加过渡效果 */

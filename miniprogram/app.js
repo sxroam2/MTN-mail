@@ -46,12 +46,13 @@ App({
     version: "1.0.0",
     customerServiceCorpId: 'ww46c0a7fc276f53df',
     customerServiceUrl: 'https://work.weixin.qq.com/kfid/kfc2f8875453d05dab3',
-    // 官网 API 地址
-    // apiBaseUrl: 'http://localhost:8026/API',
-    apiBaseUrl: 'https://www.maxcellent-starter.com/API',
+    // 官网 API 地址：留空时使用 utils/api.js 的生产默认地址；本地联调再显式改为 http://localhost:8026/API
+    apiBaseUrl: '',
     tencentMapKey: 'OJ3BZ-GMSLA-34GKK-C7LHC-YGE23-R2B7B',
     homeTitle: '迈瑟伦一体机',
     carouselData: [],
+    carouselAutoPlay: true,
+    carouselInterval: 3000,
     defaultDeviceImage: '/assets/default-device.png',
     bluetoothNameFilters: [],
     bluetoothProfileConfigsJson: '',

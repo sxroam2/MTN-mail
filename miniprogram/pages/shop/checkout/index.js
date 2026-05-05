@@ -18,6 +18,12 @@ function isTemplateAccepted(status) {
   return status === 'accept' || status === 'acceptAlways'
 }
 
+function isCheckoutItemInvalid(item) {
+  var stock = Number(item && item.stock || 0)
+  var quantity = Number(item && item.quantity || 0)
+  return stock <= 0 || quantity > stock
+}
+
 Page({
   data: {
     address: null,
@@ -69,20 +75,20 @@ Page({
 
   onShow: function () {
     // 从地址选择页返回时读取选中地址
-    var pages = getCurrentPages()
-    var current = pages[pages.length - 1]
-    if (current._selectedAddress) {
-      if (addressUtil.isDomesticAddress(current._selectedAddress)) {
+    addressUtil.consumeSelectedAddress(this, function (address) {
+      if (addressUtil.isDomesticAddress(address)) {
         this.setData({
-          address: current._selectedAddress,
-          selectedAddressId: current._selectedAddress.id
+          address: address,
+          selectedAddressId: address.id
         })
       } else {
         wx.showToast({ title: '小程序暂不支持国际地址', icon: 'none' })
       }
-      current._selectedAddress = null
       this.calcPrice()
-    }
+    }.bind(this))
+
+    var pages = getCurrentPages()
+    var current = pages[pages.length - 1]
     // 从发票页返回时读取发票信息
     if (current._invoiceInfo) {
       this.setData({ invoice: current._invoiceInfo })
@@ -184,7 +190,8 @@ Page({
               imageUrl: imageUtil.resolveImageUrl(item.imageUrl),
               price: item.price,
               originalPrice: item.originalPrice || 0,
-              quantity: item.cartItem.quantity
+              quantity: item.cartItem.quantity,
+              stock: Number(item.stock || 0)
             }
           })
 
@@ -208,6 +215,39 @@ Page({
         var displayItems = cartItems.map(function (item) {
           return productPackageDisplay.decorateCartItem(item, that._productPackageCache)
         })
+
+        if (!isBuyNowMode) {
+          var invalidItems = displayItems.filter(isCheckoutItemInvalid)
+          if (invalidItems.length) {
+            displayItems = displayItems.filter(function (item) {
+              return !isCheckoutItemInvalid(item)
+            })
+            that.setData({
+              cartItemIds: displayItems.map(function (item) { return item.id })
+            })
+
+            wx.showModal({
+              title: '商品库存变化',
+              content: invalidItems.length + ' 件商品已下架或库存不足，已从本次结算中移除。',
+              showCancel: false,
+              confirmText: '我知道了'
+            })
+          }
+
+          if (!displayItems.length) {
+            that.setData({ cartItems: [], loading: false })
+            wx.showModal({
+              title: '无法结算',
+              content: '本次选择的商品均已下架或库存不足，请返回购物车重新选择。',
+              showCancel: false,
+              success: function () {
+                wx.navigateBack()
+              }
+            })
+            return
+          }
+        }
+
         that.setData({ cartItems: displayItems, address: address, loading: false })
         that.calcPrice()
       })
@@ -293,7 +333,18 @@ Page({
 
   /** 选择地址 */
   selectAddress: function () {
-    wx.navigateTo({ url: '/pages/shop/address/index?select=1' })
+    addressUtil.navigateToAddressSelector(this, function (address) {
+      if (!addressUtil.isDomesticAddress(address)) {
+        wx.showToast({ title: '小程序暂不支持国际地址', icon: 'none' })
+        return
+      }
+
+      this.setData({
+        address: address,
+        selectedAddressId: address.id
+      })
+      this.calcPrice()
+    }.bind(this))
   },
 
   /** 跳转发票填写（保留老入口，弹窗为主） */
@@ -482,6 +533,26 @@ Page({
     return errMsg.length > 22 ? '微信支付拉起失败，请稍后重试' : errMsg
   },
 
+  showPaymentFailure: function (err, cancelMessage) {
+    var isCanceled = this.isPaymentCanceled(err)
+    var rawMessage = String(err && (err.errMsg || err.message) || '').trim()
+    var message = isCanceled ? cancelMessage : this.resolvePaymentFailureMessage(err)
+
+    console.error('[wxpay] requestPayment fail:', err)
+
+    if (!isCanceled && message === '小程序支付配置异常，请联系管理员' && rawMessage) {
+      wx.showModal({
+        title: '支付失败',
+        content: rawMessage,
+        showCancel: false
+      })
+      return rawMessage
+    }
+
+    wx.showToast({ title: message, icon: 'none' })
+    return message
+  },
+
   clearPaymentResumeTimer: function () {
     if (this._paymentResumeTimer) {
       clearTimeout(this._paymentResumeTimer)
@@ -629,11 +700,7 @@ Page({
         },
         fail: function (err) {
           that.clearPendingPayment()
-          var isCanceled = that.isPaymentCanceled(err)
-          wx.showToast({
-            title: isCanceled ? '已取消支付，可在订单详情继续支付' : that.resolvePaymentFailureMessage(err),
-            icon: 'none'
-          })
+          that.showPaymentFailure(err, '已取消支付，可在订单详情继续支付')
           that.redirectToOrderDetail(orderNo)
         }
       })

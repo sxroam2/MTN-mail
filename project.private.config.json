@@ -1,5 +1,5 @@
 {
-  "libVersion": "3.15.1",
+  "libVersion": "3.15.2",
   "projectname": "MTN-mail",
   "setting": {
     "urlCheck": false,
@@ -31,13 +31,6 @@
         {
           "name": "个人中心",
           "pathName": "pages/bar/index",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "设备管理",
-          "pathName": "pages/message/message",
           "query": "",
           "launchMode": "default",
           "scene": null

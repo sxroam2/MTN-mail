@@ -63,14 +63,30 @@ page {
   outline: 1rpx solid rgba(255, 255, 255, 0.04);
 }
 
+.order-tabs.van-tabs--line {
+  height: 80rpx !important;
+}
+
+.order-tabs .van-tabs__content {
+  display: none !important;
+}
+
 .order-tabs .van-tabs__wrap,
 .order-tabs .van-tabs__scroll,
 .order-tabs .van-tabs__nav {
   background: transparent !important;
 }
 
+.order-tabs .van-tabs__wrap,
+.order-tabs .van-tabs__scroll,
+.order-tabs .van-tabs__scroll--line,
+.order-tabs .van-tabs__nav,
+.order-tabs .van-tabs__track {
+  height: 64rpx !important;
+}
+
 .order-tabs .van-tabs__scroll {
-  overflow: visible !important;
+  overflow: hidden !important;
 }
 
 .order-tabs .van-tabs__nav {
@@ -117,7 +133,6 @@ page {
 
 .order-tabs .van-tab--active {
   background: linear-gradient(90deg, #ff6a45 0%, #ff4d4f 100%) !important;
-  box-shadow: 0 10rpx 20rpx rgba(255, 106, 69, 0.22);
 }
 
 .order-tabs .van-tab__text {

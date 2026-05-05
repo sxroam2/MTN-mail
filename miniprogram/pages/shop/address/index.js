@@ -56,13 +56,7 @@ Page({
       return
     }
     if (addr) {
-      var pages = getCurrentPages()
-      var prev = pages[pages.length - 2]
-      var eventChannel = this.getOpenerEventChannel ? this.getOpenerEventChannel() : null
-      if (eventChannel && eventChannel.emit) {
-        eventChannel.emit('addressSelected', addr)
-      }
-      if (prev) prev._selectedAddress = addr
+      addressUtil.emitSelectedAddress(this, addr)
       wx.navigateBack()
     }
   },

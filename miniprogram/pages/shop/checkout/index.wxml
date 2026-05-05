@@ -30,7 +30,7 @@
         <text class="delivery-label">物流</text>
       </view>
       <view class="delivery-right">
-        <text class="delivery-free">{{ shippingFee > 0 ? '¥' + shippingFee : '免运费' }} · 顺丰速运</text>
+        <text class="delivery-free">{{ shippingFee > 0 ? '¥' + shippingFee : '免运费' }} · 快递配送</text>
       </view>
     </view>
 

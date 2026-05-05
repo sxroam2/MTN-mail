@@ -88,7 +88,7 @@
     </view>
 
     <view class="footer-bar">
-      <van-button round block color="linear-gradient(90deg, #ff6a45, #ff4d4f)" loading="{{ saving }}" bindtap="saveAddress">保存并使用</van-button>
+      <van-button round block color="linear-gradient(90deg, #ff6a45, #ff4d4f)" loading="{{ saving }}" bindtap="saveAddress">{{ source === 'select' ? '保存并使用' : '保存地址' }}</van-button>
     </view>
   </block>
 </view>

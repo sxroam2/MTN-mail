@@ -1,5 +1,6 @@
 var api = require('../../../../utils/api.js')
 var tencentMap = require('../../../../utils/tencent-map.js')
+var addressUtil = require('../../../../utils/address.js')
 
 var DEFAULT_LOCATION = {
   latitude: 28.2282,
@@ -230,6 +231,7 @@ Page({
     parsingClipboard: false,
     geocoding: false,
     editingId: 0,
+    source: '',
     formSheetDefaultHeightPx: 0,
     formSheetHeightPx: 0,
     formSheetMaxHeightPx: 0,
@@ -257,7 +259,10 @@ Page({
     this.setupInitialFormSheetState()
 
     var editingId = Number(options.id) || 0
-    this.setData({ editingId: editingId })
+    this.setData({
+      editingId: editingId,
+      source: options.source || ''
+    })
     wx.setNavigationBarTitle({
       title: editingId ? '编辑收货地址' : '新增收货地址'
     })
@@ -810,8 +815,8 @@ Page({
       province: province,
       city: city,
       district: district,
-      street: localAddress,
-      detailAddress: '',
+      street: '',
+      detailAddress: localAddress,
       label: trimValue(form.label),
       isDefault: !!form.isDefault
     }
@@ -820,13 +825,90 @@ Page({
       ? api.put('/api/address/' + that.data.editingId, payload)
       : api.post('/api/address', payload)
 
-    request.then(function () {
+    request.then(function (res) {
       wx.showToast({ title: '保存成功', icon: 'success' })
+      if (that.data.source === 'select') {
+        that.resolveSavedAddress(payload, res).then(function (address) {
+          if (address) {
+            addressUtil.emitSelectedAddress(that, address)
+          }
+          setTimeout(function () {
+            wx.navigateBack({
+              delta: 2,
+              fail: function () {
+                wx.navigateBack()
+              }
+            })
+          }, 350)
+        }).catch(function () {
+          that.setData({ saving: false })
+          wx.showToast({ title: '地址保存成功，请返回选择', icon: 'none' })
+        })
+        return
+      }
       setTimeout(function () {
         wx.navigateBack()
       }, 350)
     }).catch(function () {
       that.setData({ saving: false })
+    })
+  },
+
+  normalizeSavedAddress: function (address, fallbackPayload) {
+    var source = address && typeof address === 'object' ? address : {}
+    var payload = fallbackPayload || {}
+    var normalized = Object.assign({}, payload, source)
+    var fullAddressText = [normalized.province, normalized.city, normalized.district, normalized.street, normalized.detailAddress]
+      .filter(hasValue)
+      .join(' ')
+
+    normalized.fullAddressText = fullAddressText
+    return normalized
+  },
+
+  isSameSavedAddress: function (address, payload) {
+    if (!address || !payload) return false
+    return trimValue(address.receiverName) === trimValue(payload.receiverName)
+      && sanitizePhone(address.receiverPhone) === sanitizePhone(payload.receiverPhone)
+      && trimValue(address.province) === trimValue(payload.province)
+      && trimValue(address.city) === trimValue(payload.city)
+      && trimValue(address.district) === trimValue(payload.district)
+      && trimValue(address.detailAddress || address.street) === trimValue(payload.detailAddress || payload.street)
+  },
+
+  resolveSavedAddress: function (payload, res) {
+    var that = this
+    var data = res && res.data !== undefined ? res.data : res
+    var directAddress = data && data.address ? data.address : data
+    var directId = typeof directAddress === 'number' || typeof directAddress === 'string'
+      ? Number(directAddress)
+      : Number(directAddress && directAddress.id || 0)
+
+    if (directAddress && typeof directAddress === 'object' && directAddress.id) {
+      return Promise.resolve(that.normalizeSavedAddress(directAddress, payload))
+    }
+
+    return api.get('/api/address', { showError: false }).then(function (listRes) {
+      var list = listRes && Array.isArray(listRes.data)
+        ? listRes.data
+        : Array.isArray(listRes)
+          ? listRes
+          : []
+      var matched = null
+
+      if (directId) {
+        matched = list.find(function (item) { return Number(item.id) === directId }) || null
+      }
+
+      if (!matched) {
+        matched = list.slice().reverse().find(function (item) {
+          return that.isSameSavedAddress(item, payload)
+        }) || null
+      }
+
+      return matched
+        ? that.normalizeSavedAddress(matched, payload)
+        : that.normalizeSavedAddress(Object.assign({ id: directId || 0 }, payload), payload)
     })
   }
 })

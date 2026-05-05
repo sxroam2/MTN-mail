@@ -1,5 +1,6 @@
 // pages/home/home.js
 const app = getApp();
+const CONNECT_TIMEOUT_MS = 8000;
 
 Page({
   data: {
@@ -12,8 +13,12 @@ Page({
     selectedIndex: -1,
     isGloballyConnected: false,
     currentlyConnectedDevice: null,
+    isConnectingDevice: false,
+    connectingDeviceName: '',
     homeTitle: '',
     defaultDeviceImage: '',
+    carouselAutoPlay: true,
+    carouselInterval: 3000,
     isInit: false // 标记是否已初始化过（用于辅助逻辑，不再阻塞渲染）
   },
 
@@ -44,6 +49,14 @@ Page({
     apiUtil.updateCartBadge();
   },
 
+  onHide() {
+    this.cancelPendingConnect(false);
+  },
+
+  onUnload() {
+    this.cancelPendingConnect(false);
+  },
+
   refreshBluetoothConnectionState() {
     if (app && typeof app.syncBluetoothConnectionState === 'function') {
       app.syncBluetoothConnectionState().finally(() => {
@@ -63,7 +76,9 @@ Page({
     this.setData({
       carouselData: cache.carouselData || [],
       homeTitle: cache.homeTitle || '迈瑟伦一体机',
-      defaultDeviceImage: cache.defaultDeviceImage || '/assets/default-device.png'
+      defaultDeviceImage: cache.defaultDeviceImage || '/assets/default-device.png',
+      carouselAutoPlay: cache.carouselAutoPlay !== false,
+      carouselInterval: cache.carouselInterval || 3000
     }, () => {
       this.loadConnectedDevices();
     });
@@ -366,6 +381,85 @@ Page({
     }, 500);
   },
 
+  beginPendingConnect(device) {
+    const requestId = Date.now() + Math.random();
+    const rawName = this.resolveDeviceRawName(device);
+    const displayInfo = this.resolveDeviceDisplayInfo(rawName, device);
+
+    this.clearPendingConnect();
+    this._activeConnectRequestId = requestId;
+    this._activeConnectDeviceId = device && device.deviceId ? device.deviceId : '';
+    this._connectTimeoutTimer = setTimeout(() => {
+      if (this._activeConnectRequestId !== requestId) {
+        return;
+      }
+
+      const timeoutDeviceId = this._activeConnectDeviceId;
+      this.clearPendingConnect();
+      this.abortPendingBluetoothConnection(timeoutDeviceId);
+      if (timeoutDeviceId) {
+        this.updateDeviceConnection(timeoutDeviceId, false);
+      }
+      wx.showToast({
+        title: '连接超时，请确认设备在线后重试',
+        icon: 'none',
+        duration: 2500
+      });
+    }, CONNECT_TIMEOUT_MS);
+
+    this.setData({
+      isConnectingDevice: true,
+      connectingDeviceName: displayInfo.alias || rawName || '设备'
+    });
+
+    return requestId;
+  },
+
+  clearPendingConnect() {
+    if (this._connectTimeoutTimer) {
+      clearTimeout(this._connectTimeoutTimer);
+      this._connectTimeoutTimer = null;
+    }
+
+    this._activeConnectRequestId = null;
+    this._activeConnectDeviceId = '';
+    this.setData({
+      isConnectingDevice: false,
+      connectingDeviceName: ''
+    });
+  },
+
+  abortPendingBluetoothConnection(deviceId) {
+    if (!deviceId) {
+      return;
+    }
+
+    wx.closeBLEConnection({
+      deviceId: deviceId,
+      complete: () => {}
+    });
+  },
+
+  cancelPendingConnect(showToast = true) {
+    if (!this.data.isConnectingDevice && !this._activeConnectDeviceId) {
+      return;
+    }
+
+    const activeDeviceId = this._activeConnectDeviceId;
+    this.clearPendingConnect();
+    this.abortPendingBluetoothConnection(activeDeviceId);
+    if (activeDeviceId) {
+      this.updateDeviceConnection(activeDeviceId, false);
+    }
+
+    if (showToast) {
+      wx.showToast({
+        title: '已取消连接',
+        icon: 'none'
+      });
+    }
+  },
+
   disconnectDevice() {
     if (!this.data.selectedDevice || !this.data.selectedDevice.deviceId) {
       wx.showToast({
@@ -519,6 +613,14 @@ Page({
     const device = e.currentTarget.dataset.device;
     if (!device) return;
 
+    if (this.data.isConnectingDevice) {
+      wx.showToast({
+        title: '正在连接设备，请稍候',
+        icon: 'none'
+      });
+      return;
+    }
+
     if (device.connected &&
       this.data.isGloballyConnected &&
       this.data.currentlyConnectedDevice &&
@@ -558,10 +660,7 @@ Page({
   },
 
   connectToNewDevice(device) {
-    wx.showLoading({
-      title: '正在连接...',
-      mask: true
-    });
+    const connectRequestId = this.beginPendingConnect(device);
 
     wx.openBluetoothAdapter({
       success: () => {
@@ -569,11 +668,20 @@ Page({
           wx.createBLEConnection({
             deviceId: device.deviceId,
             success: () => {
-              wx.hideLoading();
+              if (this._activeConnectRequestId !== connectRequestId) {
+                this.abortPendingBluetoothConnection(device.deviceId);
+                return;
+              }
+
+              this.clearPendingConnect();
               this.handleConnectedDevice(device);
             },
             fail: () => {
-              wx.hideLoading();
+              if (this._activeConnectRequestId !== connectRequestId) {
+                return;
+              }
+
+              this.clearPendingConnect();
               this.updateDeviceConnection(device.deviceId, false);
               wx.showToast({
                 title: '连接失败，设备可能不可用',
@@ -588,8 +696,18 @@ Page({
           app.getConnectedBluetoothDevices().then(({ devices }) => {
             const alreadyConnected = (devices || []).some((item) => item.deviceId === device.deviceId);
             if (alreadyConnected) {
-              wx.hideLoading();
+              if (this._activeConnectRequestId !== connectRequestId) {
+                return;
+              }
+
+              this.clearPendingConnect();
               this.handleConnectedDevice(device);
+              return;
+            }
+
+            createConnection();
+          }).catch(() => {
+            if (this._activeConnectRequestId !== connectRequestId) {
               return;
             }
 
@@ -601,7 +719,11 @@ Page({
         createConnection();
       },
       fail: () => {
-        wx.hideLoading();
+        if (this._activeConnectRequestId !== connectRequestId) {
+          return;
+        }
+
+        this.clearPendingConnect();
         wx.showModal({
           title: '提示',
           content: '请开启手机蓝牙',

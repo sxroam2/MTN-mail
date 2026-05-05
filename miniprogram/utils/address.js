@@ -74,9 +74,130 @@ function filterDomesticAddresses(addresses) {
   return (addresses || []).filter(isDomesticAddress)
 }
 
+var PENDING_SELECTED_ADDRESS_KEY = '__pendingSelectedAddress'
+
+function cloneAddress(address) {
+  return address ? Object.assign({}, address) : null
+}
+
+function getGlobalData() {
+  try {
+    var app = getApp()
+    return app && app.globalData ? app.globalData : null
+  } catch (error) {
+    return null
+  }
+}
+
+function setPendingSelectedAddress(address) {
+  var globalData = getGlobalData()
+  if (!globalData) {
+    return
+  }
+
+  globalData[PENDING_SELECTED_ADDRESS_KEY] = cloneAddress(address)
+}
+
+function clearPendingSelectedAddress() {
+  var globalData = getGlobalData()
+  if (!globalData) {
+    return
+  }
+
+  globalData[PENDING_SELECTED_ADDRESS_KEY] = null
+}
+
+function consumePendingSelectedAddress() {
+  var globalData = getGlobalData()
+  if (!globalData || !globalData[PENDING_SELECTED_ADDRESS_KEY]) {
+    return null
+  }
+
+  var address = cloneAddress(globalData[PENDING_SELECTED_ADDRESS_KEY])
+  globalData[PENDING_SELECTED_ADDRESS_KEY] = null
+  return address
+}
+
+function emitSelectedAddress(page, address) {
+  if (!address) {
+    return
+  }
+
+  var nextAddress = cloneAddress(address)
+  var eventChannel = null
+  var pages = getCurrentPages()
+  var prev = pages[pages.length - 2]
+
+  setPendingSelectedAddress(nextAddress)
+
+  try {
+    eventChannel = page && typeof page.getOpenerEventChannel === 'function'
+      ? page.getOpenerEventChannel()
+      : null
+  } catch (error) {
+    eventChannel = null
+  }
+
+  if (eventChannel && eventChannel.emit) {
+    eventChannel.emit('addressSelected', nextAddress)
+  }
+
+  if (prev) {
+    prev._selectedAddress = nextAddress
+  }
+}
+
+function navigateToAddressSelector(page, onSelected) {
+  wx.navigateTo({
+    url: '/pages/shop/address/index?select=1',
+    events: {
+      addressSelected: function (address) {
+        if (page) {
+          page._selectedAddress = null
+        }
+        clearPendingSelectedAddress()
+        if (address && typeof onSelected === 'function') {
+          onSelected(cloneAddress(address))
+        }
+      }
+    }
+  })
+}
+
+function consumeSelectedAddress(page, onSelected) {
+  var current = page || null
+  var address = current && current._selectedAddress ? cloneAddress(current._selectedAddress) : null
+
+  if (current) {
+    current._selectedAddress = null
+  }
+
+  if (address) {
+    clearPendingSelectedAddress()
+  } else {
+    address = consumePendingSelectedAddress()
+  }
+
+  if (!address) {
+    return false
+  }
+
+  if (typeof onSelected === 'function') {
+    onSelected(cloneAddress(address))
+  }
+
+  return true
+}
+
 module.exports = {
+  clearPendingSelectedAddress: clearPendingSelectedAddress,
+  consumePendingSelectedAddress: consumePendingSelectedAddress,
+  consumeSelectedAddress: consumeSelectedAddress,
+  emitSelectedAddress: emitSelectedAddress,
   filterDomesticAddresses: filterDomesticAddresses,
   isDomesticAddress: isDomesticAddress,
+  navigateToAddressSelector: navigateToAddressSelector,
   normalizeAddressType: normalizeAddressType,
-  resolveAddressType: resolveAddressType
+  resolveAddressType: resolveAddressType,
+  setPendingSelectedAddress: setPendingSelectedAddress
 }

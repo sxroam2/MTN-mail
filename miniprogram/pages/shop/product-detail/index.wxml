@@ -97,7 +97,7 @@
     <view class="section-card service-card" bindtap="showServiceInfo">
       <view class="service-row">
         <text class="service-label">服务</text>
-        <text class="service-value">快递发货 · 收货后结算</text>
+        <text class="service-value">快递发货 · 平台担保 · 售后保障</text>
         <van-icon name="arrow" size="14px" color="#666" class="service-arrow" />
       </view>
     </view>
@@ -159,7 +159,7 @@
 
     <!-- 底部操作栏 -->
     <van-goods-action custom-class="detail-goods-action">
-      <van-goods-action-icon wx:if="{{ isLoggedIn }}" icon="chat-o" text="客服" bindtap="openCustomerService" color="#bbb" />
+      <van-goods-action-icon icon="chat-o" text="客服" bindtap="openCustomerService" color="#bbb" />
       <van-goods-action-icon icon="shop-o" text="店铺" bindtap="goShop" color="#bbb" />
       <van-goods-action-icon icon="cart-o" text="购物车" bindtap="goToCart" info="{{ cartCount || '' }}" color="#bbb" />
       <van-goods-action-button
@@ -192,8 +192,8 @@
           <view class="service-drawer-desc">迈瑟伦商城支持快递发货配送上门，运费说明以结算页为准。</view>
         </view>
         <view class="service-drawer-section">
-          <view class="service-drawer-title">收货后结算</view>
-          <view class="service-drawer-desc">您的交易资金由迈瑟伦平台全程保障。买家确认收货或到达系统自动确认收货时间后，货款将结算给商家，请放心购买。</view>
+          <view class="service-drawer-title">平台担保</view>
+          <view class="service-drawer-desc">您的交易资金由迈瑟伦平台全程保障，订单支付、发货、物流和售后均可在小程序内追踪。</view>
         </view>
         <view class="service-drawer-section">
           <view class="service-drawer-title">售后保障</view>

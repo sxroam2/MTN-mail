@@ -153,8 +153,18 @@ Page({
 
   /** 清空历史 */
   clearHistory: function () {
-    this.setData({ history: [] })
-    wx.removeStorageSync(HISTORY_KEY)
+    var that = this
+    wx.showModal({
+      title: '清空搜索历史',
+      content: '确定删除全部搜索历史吗？',
+      confirmText: '清空',
+      confirmColor: '#ff4d4f',
+      success: function (res) {
+        if (!res.confirm) return
+        that.setData({ history: [] })
+        wx.removeStorageSync(HISTORY_KEY)
+      }
+    })
   },
 
   /** 取消搜索 */
@@ -179,8 +189,9 @@ Page({
       return
     }
 
-    if (!api.isLoggedIn()) {
-      wx.showToast({ title: '请先在个人中心登录', icon: 'none' })
+    if (!api.requireLogin({
+      message: '登录后可把心仪商品加入购物车。'
+    })) {
       return
     }
 

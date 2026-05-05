@@ -336,6 +336,14 @@ Page({
     });
   },
 
+  showConnectFailure() {
+    wx.showToast({
+      title: '连接失败，请重试',
+      icon: 'none',
+      duration: 2200
+    });
+  },
+
   // 连接设备
   connectToDevice(e) {
     const device = e.currentTarget.dataset.device;
@@ -361,11 +369,7 @@ Page({
             fail: (err) => {
               wx.hideLoading();
               console.error('连接失败:', err);
-
-              wx.showToast({
-                title: '连接失败',
-                icon: 'error'
-              });
+              this.showConnectFailure();
             }
           });
         };
@@ -380,6 +384,8 @@ Page({
               return;
             }
 
+            createConnection();
+          }).catch(() => {
             createConnection();
           });
           return;

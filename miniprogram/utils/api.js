@@ -4,6 +4,7 @@
  */
 
 const TOKEN_KEY = 'maxcellent_token';
+const LOGIN_PAGE_SCROLL_TOP_KEY = 'maxcellent_login_page_scroll_top';
 const LANG = 'zh-cn';
 const DEFAULT_API_BASE_URL = 'https://www.maxcellent-starter.com/API';
 
@@ -51,6 +52,42 @@ function clearToken() {
 
 function isLoggedIn() {
   return !!getToken();
+}
+
+function markLoginPageScrollTop() {
+  wx.setStorageSync(LOGIN_PAGE_SCROLL_TOP_KEY, 1);
+}
+
+function consumeLoginPageScrollTop() {
+  const shouldScrollTop = !!wx.getStorageSync(LOGIN_PAGE_SCROLL_TOP_KEY);
+  wx.removeStorageSync(LOGIN_PAGE_SCROLL_TOP_KEY);
+  return shouldScrollTop;
+}
+
+function goToLoginPage() {
+  markLoginPageScrollTop();
+  wx.switchTab({ url: '/pages/bar/index' });
+}
+
+function requireLogin(options = {}) {
+  if (isLoggedIn()) {
+    return true;
+  }
+
+  wx.showModal({
+    title: options.title || '需要登录',
+    content: options.message || '登录后可继续使用购物车、订单、收货地址等服务。',
+    confirmText: options.confirmText || '去登录',
+    cancelText: options.cancelText || '先逛逛',
+    confirmColor: '#ff6a45',
+    success(res) {
+      if (res.confirm) {
+        goToLoginPage();
+      }
+    }
+  });
+
+  return false;
 }
 
 function buildRequestPath(path, query) {
@@ -271,5 +308,8 @@ module.exports = {
   clearToken,
   isLoggedIn,
   getBaseUrl,
+  consumeLoginPageScrollTop,
+  goToLoginPage,
+  requireLogin,
   updateCartBadge
 };

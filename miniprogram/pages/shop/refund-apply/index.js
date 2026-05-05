@@ -1,5 +1,6 @@
 var api = require('../../../utils/api.js')
 var imageUtil = require('../../../utils/image.js')
+var addressUtil = require('../../../utils/address.js')
 var afterSalesUtil = require('../../../utils/after-sales.js')
 
 function buildIncompleteRepairLockReasonMap(requests) {
@@ -120,7 +121,6 @@ Page({
 
   _detailPayload: null,
   _pageConfig: null,
-  _selectedAddress: null,
   _pickupFeeRules: null,
   _expressRules: null,
   _productPackageCache: null,
@@ -153,12 +153,9 @@ Page({
   },
 
   syncSelectedAddressFromPage: function () {
-    var pages = getCurrentPages()
-    var current = pages[pages.length - 1]
-    if (current && current._selectedAddress) {
-      this.applySelectedAddress(current._selectedAddress)
-      current._selectedAddress = null
-    }
+    addressUtil.consumeSelectedAddress(this, function (address) {
+      this.applySelectedAddress(address)
+    }.bind(this))
   },
 
   buildDefaultPickupSelection: function () {
@@ -764,19 +761,11 @@ Page({
   },
 
   chooseAddress: function () {
-    var that = this
-    wx.navigateTo({
-      url: '/pages/shop/address/index?select=1',
-      success: function (res) {
-        if (res && res.eventChannel) {
-          res.eventChannel.on('addressSelected', function (address) {
-            if (address) {
-              that.applySelectedAddress(address)
-            }
-          })
-        }
+    addressUtil.navigateToAddressSelector(this, function (address) {
+      if (address) {
+        this.applySelectedAddress(address)
       }
-    })
+    }.bind(this))
   },
 
   applySelectedAddress: function (address) {
@@ -1674,6 +1663,26 @@ Page({
     return errMsg.length > 22 ? '微信支付拉起失败，请稍后重试' : errMsg
   },
 
+  showPaymentFailure: function (err, cancelMessage) {
+    var isCanceled = this.isPaymentCanceled(err)
+    var rawMessage = String(err && (err.errMsg || err.message) || '').trim()
+    var message = isCanceled ? cancelMessage : this.resolvePaymentFailureMessage(err)
+
+    console.error('[wxpay] requestPayment fail:', err)
+
+    if (!isCanceled && message === '小程序支付配置异常，请联系管理员' && rawMessage) {
+      wx.showModal({
+        title: '支付失败',
+        content: rawMessage,
+        showCancel: false
+      })
+      return rawMessage
+    }
+
+    wx.showToast({ title: message, icon: 'none' })
+    return message
+  },
+
   createHandledError: function (message) {
     return {
       handled: true,
@@ -1788,10 +1797,7 @@ Page({
             that.pollAfterSalesSupplementStatus(payData.tradeNo, 0).then(resolve).catch(reject)
           },
           fail: function (err) {
-            var message = that.isPaymentCanceled(err)
-              ? '已取消支付，可稍后重新提交'
-              : that.resolvePaymentFailureMessage(err)
-            wx.showToast({ title: message, icon: 'none' })
+            var message = that.showPaymentFailure(err, '已取消支付，可稍后重新提交')
             reject(that.createHandledError(message))
           }
         })

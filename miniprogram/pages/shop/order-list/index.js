@@ -727,6 +727,26 @@ Page({
     return errMsg.length > 22 ? '微信支付拉起失败，请稍后重试' : errMsg
   },
 
+  showPaymentFailure: function (err, cancelMessage) {
+    var isCanceled = this.isPaymentCanceled(err)
+    var rawMessage = String(err && (err.errMsg || err.message) || '').trim()
+    var message = isCanceled ? cancelMessage : this.resolvePaymentFailureMessage(err)
+
+    console.error('[wxpay] requestPayment fail:', err)
+
+    if (!isCanceled && message === '小程序支付配置异常，请联系管理员' && rawMessage) {
+      wx.showModal({
+        title: '支付失败',
+        content: rawMessage,
+        showCancel: false
+      })
+      return rawMessage
+    }
+
+    wx.showToast({ title: message, icon: 'none' })
+    return message
+  },
+
   payOrder: function (e) {
     var that = this
     var orderNo = e.currentTarget.dataset.no
@@ -752,10 +772,7 @@ Page({
         },
         fail: function (err) {
           var isCanceled = that.isPaymentCanceled(err)
-          wx.showToast({
-            title: isCanceled ? '支付取消' : that.resolvePaymentFailureMessage(err),
-            icon: 'none'
-          })
+          that.showPaymentFailure(err, '支付取消')
           if (!isCanceled) {
             that.resetAndLoad()
           }

@@ -1,6 +1,13 @@
 <view class="page">
   <van-loading wx:if="{{ loading }}" size="36px" color="#ff6a45" vertical class="page-loading">加载中...</van-loading>
 
+  <view wx:elif="{{ loginRequired }}" class="empty-wrap auth-wrap">
+    <van-icon name="user-o" size="80px" color="#555" />
+    <text class="auth-title">登录后查看购物车</text>
+    <text class="auth-desc">购物车、收货地址和订单进度都会跟随账号同步</text>
+    <van-button round type="primary" color="linear-gradient(90deg, #ff6a45, #ff4d4f)" size="small" bindtap="goLogin">去登录</van-button>
+  </view>
+
   <view wx:elif="{{ isEmpty }}" class="empty-wrap">
     <van-icon name="shopping-cart-o" size="80px" color="#555" />
     <text class="empty-text">购物车是空的</text>
@@ -15,14 +22,19 @@
         <text class="top-address-text">{{ deliveryAddressText || '请选择收货地址' }}</text>
         <van-icon name="arrow" size="12px" color="#666" />
       </view>
-      <view class="top-edit-btn" bindtap="toggleEditMode">
-        <text class="top-edit-text">{{ isEditMode ? '完成' : '编辑' }}</text>
+      <view class="top-actions">
+        <view wx:if="{{ invalidCount > 0 }}" class="top-clean-btn" bindtap="clearInvalidItems">
+          <text>清理失效</text>
+        </view>
+        <view class="top-edit-btn" bindtap="toggleEditMode">
+          <text class="top-edit-text">{{ isEditMode ? '完成' : '编辑' }}</text>
+        </view>
       </view>
     </view>
 
     <van-checkbox-group value="{{ checkedIds }}" bind:change="onCheckChange">
-      <view wx:for="{{ cartItems }}" wx:key="id" class="cart-item">
-        <van-checkbox name="{{ item.id }}" checked-color="#ff6a45" class="item-checkbox" />
+      <view wx:for="{{ cartItems }}" wx:key="id" class="cart-item {{ item.isInvalid ? 'cart-item--invalid' : '' }}">
+        <van-checkbox name="{{ item.id }}" checked-color="#ff6a45" disabled="{{ item.isInvalid }}" class="item-checkbox" />
         <view class="item-content" bindtap="goToDetail" data-id="{{ item.productId }}">
           <van-image
             width="160rpx"
@@ -34,6 +46,7 @@
           />
           <view class="item-info">
             <text class="item-name">{{ item.productName }}</text>
+            <text wx:if="{{ item.isInvalid }}" class="invalid-tag">{{ item.invalidReason }}</text>
             <view class="item-spec" catchtap="openSkuDrawer" data-id="{{ item.id }}">
               <text class="item-spec-text">{{ item.packageName }}</text>
               <van-icon name="arrow-down" size="10px" color="#888" />
@@ -45,9 +58,9 @@
                 <text wx:if="{{ item.originalTotalPrice }}" class="item-original-price">¥{{ item.originalTotalPrice }}</text>
               </view>
               <view class="qty-stepper" catchtap="">
-                <view class="qty-btn {{ item.quantity <= 1 ? 'disabled' : '' }}" data-id="{{ item.id }}" data-action="minus" catchtap="onStepperTap">−</view>
+                <view class="qty-btn {{ item.quantity <= 1 || item.isInvalid ? 'disabled' : '' }}" data-id="{{ item.id }}" data-action="minus" catchtap="onStepperTap">−</view>
                 <text class="qty-value">{{ item.quantity }}</text>
-                <view class="qty-btn {{ item.quantity >= item.stock ? 'disabled' : '' }}" data-id="{{ item.id }}" data-action="plus" catchtap="onStepperTap">＋</view>
+                <view class="qty-btn {{ item.quantity >= item.stock || item.isInvalid ? 'disabled' : '' }}" data-id="{{ item.id }}" data-action="plus" catchtap="onStepperTap">＋</view>
               </view>
             </view>
           </view>

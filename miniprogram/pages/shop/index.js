@@ -131,8 +131,9 @@ Page({
     var product = that.data.allProducts.find(function (p) { return p.id === id })
     if (!product || product.stock <= 0) return
 
-    if (!api.isLoggedIn()) {
-      wx.showToast({ title: '请先在个人中心登录', icon: 'none' })
+    if (!api.requireLogin({
+      message: '登录后可加入购物车，并同步到你的账号。'
+    })) {
       return
     }
 

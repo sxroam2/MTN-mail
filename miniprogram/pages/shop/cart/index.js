@@ -22,7 +22,9 @@ Page({
     totalPrice: 0,
     originalTotalPrice: 0,
     totalCount: 0,
+    invalidCount: 0,
     loading: true,
+    loginRequired: false,
     isEmpty: false,
     isEditMode: false,
     // 地址
@@ -42,6 +44,7 @@ Page({
 
   onShow: function () {
     if (api.isLoggedIn()) {
+      this.setData({ loginRequired: false })
       this.loadCart()
       if (!this.syncSelectedAddressFromPage()) {
         this.loadDeliveryAddress()
@@ -49,13 +52,28 @@ Page({
     } else {
       this._checkedIdsInitialized = false
       this._checkedIdsSnapshot = []
-      this.setData({ loading: false, isEmpty: true })
+      this.setData({
+        loading: false,
+        loginRequired: true,
+        isEmpty: false,
+        cartItems: [],
+        checkedIds: [],
+        allChecked: false,
+        totalPrice: 0,
+        originalTotalPrice: 0,
+        totalCount: 0,
+        deliveryAddress: null,
+        deliveryAddressText: '',
+        isEditMode: false
+      })
     }
     api.updateCartBadge()
   },
 
   resolveCheckedIdsForItems: function (items) {
-    var itemIds = (items || []).map(function (item) { return String(item.id) })
+    var itemIds = (items || []).filter(function (item) {
+      return !item.isInvalid
+    }).map(function (item) { return String(item.id) })
 
     if (!this._checkedIdsInitialized) {
       this._checkedIdsInitialized = true
@@ -74,20 +92,23 @@ Page({
 
   syncCheckedState: function (checkedIds) {
     var normalizedCheckedIds = (checkedIds || []).map(function (id) { return String(id) })
+    var validCount = (this.data.cartItems || []).filter(function (item) {
+      return !item.isInvalid
+    }).length
 
     this._checkedIdsInitialized = true
     this._checkedIdsSnapshot = normalizedCheckedIds.slice()
     this.setData({
       checkedIds: normalizedCheckedIds,
       allChecked:
-        normalizedCheckedIds.length === this.data.cartItems.length && normalizedCheckedIds.length > 0
+        normalizedCheckedIds.length === validCount && validCount > 0
     })
   },
 
   loadCart: function () {
     var that = this
     that._productPackageCache = that._productPackageCache || {}
-    that.setData({ loading: true, isEmpty: false })
+    that.setData({ loading: true, loginRequired: false, isEmpty: false })
     api.get('/api/cart').then(function (res) {
       var payload = res && Array.isArray(res.data)
         ? res.data
@@ -109,7 +130,9 @@ Page({
           originalPrice: item.originalPrice || 0,
           totalPrice: formatPrice(unitPrice * qty),
           originalTotalPrice: item.originalPrice && item.originalPrice > unitPrice ? formatPrice(item.originalPrice * qty) : '',
-          stock: item.stock
+          stock: Number(item.stock || 0),
+          isInvalid: Number(item.stock || 0) <= 0,
+          invalidReason: Number(item.stock || 0) <= 0 ? '已下架/缺货' : ''
         }
       })
 
@@ -126,11 +149,15 @@ Page({
           return productPackageDisplay.decorateCartItem(item, that._productPackageCache)
         })
         var checkedIds = that.resolveCheckedIdsForItems(displayItems)
+        var validCount = displayItems.filter(function (item) { return !item.isInvalid }).length
+        var invalidCount = displayItems.length - validCount
         that.setData({
           cartItems: displayItems,
           checkedIds: checkedIds,
-          allChecked: displayItems.length > 0 && checkedIds.length === displayItems.length,
+          allChecked: validCount > 0 && checkedIds.length === validCount,
+          loginRequired: false,
           isEmpty: displayItems.length === 0,
+          invalidCount: invalidCount,
           loading: false
         })
         that.calcTotal()
@@ -138,13 +165,15 @@ Page({
     }).catch(function () {
       that.setData({
         loading: false,
+        loginRequired: false,
         isEmpty: true,
         cartItems: [],
         checkedIds: [],
         allChecked: false,
         totalPrice: 0,
         originalTotalPrice: 0,
-        totalCount: 0
+        totalCount: 0,
+        invalidCount: 0
       })
       that._checkedIdsInitialized = false
       that._checkedIdsSnapshot = []
@@ -169,11 +198,8 @@ Page({
   },
 
   syncSelectedAddressFromPage: function () {
-    var pages = getCurrentPages()
-    var current = pages[pages.length - 1]
-    if (current && current._selectedAddress) {
-      if (addressUtil.isDomesticAddress(current._selectedAddress)) {
-        var addr = current._selectedAddress
+    return addressUtil.consumeSelectedAddress(this, function (addr) {
+      if (addressUtil.isDomesticAddress(addr)) {
         this.setData({
           deliveryAddress: addr,
           deliveryAddressText: buildAddressText(addr)
@@ -181,10 +207,7 @@ Page({
       } else {
         wx.showToast({ title: '小程序暂不支持国际地址', icon: 'none' })
       }
-      current._selectedAddress = null
-      return true
-    }
-    return false
+    }.bind(this))
   },
 
   goAddressSelect: function () {
@@ -192,7 +215,21 @@ Page({
       wx.showToast({ title: '请先登录', icon: 'none' })
       return
     }
-    wx.navigateTo({ url: '/pages/shop/address/index?select=1' })
+    addressUtil.navigateToAddressSelector(this, function (addr) {
+      if (!addressUtil.isDomesticAddress(addr)) {
+        wx.showToast({ title: '小程序暂不支持国际地址', icon: 'none' })
+        return
+      }
+
+      this.setData({
+        deliveryAddress: addr,
+        deliveryAddressText: buildAddressText(addr)
+      })
+    }.bind(this))
+  },
+
+  goLogin: function () {
+    api.goToLoginPage()
   },
 
   toggleEditMode: function () {
@@ -203,7 +240,7 @@ Page({
       this.syncCheckedState([])
     } else {
       // 退出编辑模式：重新全选
-      var checkedIds = this.data.cartItems.map(function (i) { return String(i.id) })
+      var checkedIds = this.data.cartItems.filter(function (i) { return !i.isInvalid }).map(function (i) { return String(i.id) })
       this.setData({ isEditMode: false })
       this.syncCheckedState(checkedIds)
     }
@@ -218,7 +255,9 @@ Page({
 
   toggleAll: function () {
     var allChecked = !this.data.allChecked
-    var checkedIds = allChecked ? this.data.cartItems.map(function (i) { return String(i.id) }) : []
+    var checkedIds = allChecked
+      ? this.data.cartItems.filter(function (i) { return !i.isInvalid }).map(function (i) { return String(i.id) })
+      : []
     this.syncCheckedState(checkedIds)
     this.calcTotal()
   },
@@ -230,7 +269,7 @@ Page({
     var originalTotal = 0
     var count = 0
     items.forEach(function (item) {
-      if (ids.indexOf(String(item.id)) >= 0) {
+      if (!item.isInvalid && ids.indexOf(String(item.id)) >= 0) {
         total += item.price * item.quantity
         var origPrice = item.originalPrice && item.originalPrice > item.price ? item.originalPrice : item.price
         originalTotal += origPrice * item.quantity
@@ -251,6 +290,10 @@ Page({
     var action = e.currentTarget.dataset.action
     var item = that.data.cartItems.find(function (i) { return i.id === id })
     if (!item) return
+    if (item.isInvalid) {
+      wx.showToast({ title: '该商品已失效，请先清理', icon: 'none' })
+      return
+    }
 
     var newQty = action === 'plus' ? item.quantity + 1 : item.quantity - 1
     if (newQty < 1 || newQty > item.stock) return
@@ -284,6 +327,10 @@ Page({
     var cartItemId = e.currentTarget.dataset.id
     var item = that.data.cartItems.find(function (i) { return i.id === cartItemId })
     if (!item) return
+    if (item.isInvalid) {
+      wx.showToast({ title: '该商品已失效，请先清理', icon: 'none' })
+      return
+    }
 
     that.setData({
       showSkuDrawer: true,
@@ -358,6 +405,34 @@ Page({
             api.updateCartBadge()
           })
         }
+      }
+    })
+  },
+
+  clearInvalidItems: function () {
+    var that = this
+    var ids = that.data.cartItems.filter(function (item) {
+      return item.isInvalid
+    }).map(function (item) {
+      return item.id
+    })
+
+    if (!ids.length) return
+
+    wx.showModal({
+      title: '清理失效商品',
+      content: '确定删除购物车中 ' + ids.length + ' 件失效商品吗？',
+      confirmText: '清理',
+      confirmColor: '#ff4d4f',
+      success: function (res) {
+        if (!res.confirm) return
+        Promise.all(ids.map(function (id) {
+          return api.del('/api/cart/' + id)
+        })).then(function () {
+          wx.showToast({ title: '已清理', icon: 'success' })
+          that.loadCart()
+          api.updateCartBadge()
+        })
       }
     })
   },

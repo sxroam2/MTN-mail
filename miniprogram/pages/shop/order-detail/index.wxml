@@ -89,6 +89,7 @@
         <text class="info-value invoice-value-text">{{ order.invoiceEmail }}</text>
       </view>
       <view wx:if="{{ order.invoiceFailReason }}" class="invoice-tip">{{ order.invoiceFailReason }}</view>
+      <view wx:if="{{ invoiceNoticeText }}" class="invoice-tip">{{ invoiceNoticeText }}</view>
     </view>
 
     <view class="section-card">

@@ -5,7 +5,6 @@ const imageUtil = require('../../utils/image.js');
 
 const DEVTOOLS_MOCK_PHONE = '18570330244';
 const DEFAULT_NICKNAME = '微信用户';
-const PRODUCTION_API_BASE_URL = 'https://www.maxcellent-starter.com/api';
 
 function normalizeNickname(value) {
   const nickname = String(value || '').trim();
@@ -62,20 +61,10 @@ function getMiniProgramEnvVersion() {
 }
 
 function isMockLoginEnabled(platform) {
-  var envVersion = getMiniProgramEnvVersion();
-  var baseUrl = String(api.getBaseUrl() || '').trim().replace(/\/+$/, '').toLowerCase();
-  if (platform === 'devtools') {
-    return true;
-  }
-
-  if (envVersion === 'develop' || envVersion === 'trial') {
-    return true;
-  }
-
-  return !!baseUrl && baseUrl !== PRODUCTION_API_BASE_URL;
+  return platform === 'devtools';
 }
 
-function buildMockLoginTip(platform, enabled, envVersion) {
+function buildMockLoginTip(platform, enabled) {
   if (!enabled) {
     return '';
   }
@@ -84,15 +73,7 @@ function buildMockLoginTip(platform, enabled, envVersion) {
     return '开发者工具可用，不影响正式微信手机号登录';
   }
 
-  if (envVersion === 'develop') {
-    return '当前为开发版真机预览，已开启模拟登录，不影响正式微信手机号登录';
-  }
-
-  if (envVersion === 'trial') {
-    return '当前为体验版真机预览，已开启模拟登录，不影响正式微信手机号登录';
-  }
-
-  return '当前为调试接口环境，真机预览也可用，不影响正式微信手机号登录';
+  return '';
 }
 
 function summarizePhoneCredential(code) {
@@ -120,7 +101,7 @@ function getMockLoginState(platform) {
   return {
     envVersion: envVersion,
     enabled: enabled,
-    tip: buildMockLoginTip(platform, enabled, envVersion)
+    tip: buildMockLoginTip(platform, enabled)
   };
 }
 
@@ -200,6 +181,26 @@ Page({
     } else {
       this.resetBluetoothDebugMenu();
     }
+
+    this.scrollToTopOnLoginEntry();
+  },
+
+  scrollToTopOnLoginEntry() {
+    if (!api.consumeLoginPageScrollTop()) {
+      return;
+    }
+
+    setTimeout(function () {
+      if (typeof wx.pageScrollTo !== 'function') {
+        return;
+      }
+
+      wx.pageScrollTo({
+        scrollTop: 0,
+        duration: 0,
+        fail: function () {}
+      });
+    }, 0);
   },
 
   refreshPrivacySetting() {
@@ -257,6 +258,25 @@ Page({
     });
   },
 
+  resetLocalProfileState() {
+    wx.removeStorageSync('userPhone');
+    wx.removeStorageSync('userNickname');
+    wx.removeStorageSync('userAvatar');
+
+    this.setData({
+      isLoggedIn: false,
+      userPhone: '',
+      maskedUserPhone: '',
+      nickname: DEFAULT_NICKNAME,
+      tempNickname: DEFAULT_NICKNAME,
+      avatarUrl: '',
+      showUserDialog: false,
+      profileSyncPending: false,
+      phoneLoginPending: false,
+      showBluetoothDebugMenu: false
+    });
+  },
+
   syncProfileFromServer() {
     const that = this;
 
@@ -272,11 +292,7 @@ Page({
       return profile || null;
     }).catch(function () {
       if (!api.isLoggedIn()) {
-        that.setData({
-          isLoggedIn: false,
-          userPhone: '',
-          maskedUserPhone: ''
-        });
+        that.resetLocalProfileState();
         that.resetBluetoothDebugMenu();
       }
       return null;
@@ -300,11 +316,7 @@ Page({
 
     return appInstance.loadBluetoothDebugAccess().then(function (payload) {
       if (!api.isLoggedIn()) {
-        that.setData({
-          isLoggedIn: false,
-          userPhone: '',
-          maskedUserPhone: ''
-        });
+        that.resetLocalProfileState();
         that.resetBluetoothDebugMenu();
         return null;
       }
@@ -315,11 +327,7 @@ Page({
       return payload || null;
     }).catch(function () {
       if (!api.isLoggedIn()) {
-        that.setData({
-          isLoggedIn: false,
-          userPhone: '',
-          maskedUserPhone: ''
-        });
+        that.resetLocalProfileState();
       }
       that.resetBluetoothDebugMenu();
       return null;
@@ -357,6 +365,7 @@ Page({
       userPhone: loginData.phone || this.data.userPhone,
       maskedUserPhone: maskPhone(loginData.phone || this.data.userPhone)
     });
+    api.updateCartBadge();
     this.loadBluetoothDebugMenu();
     this.syncProfileFromServer();
     wx.showToast({ title: '登录成功', icon: 'success' });
@@ -390,31 +399,31 @@ Page({
     }
 
     if (/诊断号\s*[:：]/.test(text)) {
-      return text;
+      return '当前微信登录暂时不可用，请稍后再试，如多次失败请联系客服处理。';
     }
 
     if (/appid privacy api banned|未采集隐私/i.test(text)) {
-      return '当前小程序版本在微信平台侧被禁用了手机号隐私接口。请核对提审时是否误选“未采集隐私”，修正后重新上传版本再试。';
+      return '当前版本暂时无法使用手机号快捷登录，请稍后再试或联系客服处理。';
     }
 
     if (/api scope is not declared in the privacy agreement|privacy agreement/i.test(text)) {
-      return '小程序后台“用户隐私保护指引”里的手机号声明尚未生效或未正确配置。微信官方说明此类隐私声明变更通常约 5 分钟后生效，请稍后重试；若仍失败，请删除微信最近使用中的小程序后重新进入。';
+      return '登录能力刚刚更新，通常几分钟内会恢复，请稍后再试。';
     }
 
     if (/微信手机号授权校验未通过/.test(text)) {
-      return text;
+      return '微信手机号登录暂时不可用，请稍后重试。';
     }
 
     if (/HTTP\s*412|授权校验未通过/.test(text)) {
       if (this.data.privacyNeedAuthorization) {
-        return '当前微信侧仍要求先完成隐私授权，请点击登录按钮重新同意隐私指引后再试。';
+        return '请先同意隐私指引，再点击手机号登录。';
       }
 
-      return '微信前端已成功返回手机号授权凭证，但微信平台未放行当前版本的手机号换号权限。请优先检查当前开发版/体验版在微信后台的“收集手机号”隐私声明和手机号接口权限状态；若刚修改过配置，请等待约 5 分钟后删除微信最近使用中的小程序，再重新进入真机重试。';
+      return '当前微信登录还在同步，请稍后再试；如刚更新配置，稍等几分钟后重新进入小程序即可。';
     }
 
     if (/40029|invalid code/i.test(text)) {
-      return '微信手机号授权已失效，请重新点击登录。';
+      return '本次登录信息已失效，请重新点击登录。';
     }
 
     if (/privacy/i.test(text)) {
@@ -431,14 +440,14 @@ Page({
   handlePhoneNumberReject(detail) {
     var errMsg = String(detail && detail.errMsg || '').trim();
     if (/cancel/i.test(errMsg)) {
-      wx.showToast({ title: '已取消手机号授权', icon: 'none' });
+      wx.showToast({ title: '本次未登录，可稍后再试', icon: 'none' });
       return;
     }
 
     if (/privacy/i.test(errMsg)) {
       wx.showModal({
         title: '需要隐私授权',
-        content: '请先同意微信隐私保护指引后，再使用手机号登录。',
+        content: '先同意微信隐私保护指引，再完成手机号登录。',
         confirmText: '查看指引',
         success: function (res) {
           if (res.confirm && typeof wx.openPrivacyContract === 'function') {
@@ -449,11 +458,25 @@ Page({
       return;
     }
 
-    wx.showToast({ title: '手机号授权失败，请重试', icon: 'none' });
+    wx.showToast({ title: '登录未完成，请再试一次', icon: 'none' });
   },
 
-  onAgreePrivacyAuthorization() {
+  onAgreePrivacyAuthorization(e) {
+    var detail = e && e.detail ? e.detail : {};
+
     this.refreshPrivacySetting();
+
+    if (detail.errMsg && detail.errMsg !== 'agreePrivacyAuthorization:ok') {
+      if (/cancel/i.test(detail.errMsg)) {
+        wx.showToast({ title: '已取消隐私授权', icon: 'none' });
+        return;
+      }
+
+      wx.showToast({ title: '隐私授权失败，请重试', icon: 'none' });
+      return;
+    }
+
+    wx.showToast({ title: '已同意隐私指引，请继续完成登录', icon: 'none' });
   },
 
   // 获取微信手机号登录
@@ -563,17 +586,28 @@ Page({
 
   // 退出登录
   onLogout() {
-    api.clearToken();
-    wx.removeStorageSync('userPhone');
-    this.setData({
-      isLoggedIn: false,
-      userPhone: '',
-      maskedUserPhone: '',
-      showUserDialog: false,
-      profileSyncPending: false,
-      showBluetoothDebugMenu: false
+    var that = this;
+
+    if (!this.data.isLoggedIn) {
+      return;
+    }
+
+    wx.showModal({
+      title: '退出登录',
+      content: '退出后可重新用微信手机号登录，购物车、订单和收货地址仍会保留在您的账号里。',
+      confirmText: '退出登录',
+      confirmColor: '#ff4d4f',
+      success: function (res) {
+        if (!res.confirm) {
+          return;
+        }
+
+        api.clearToken();
+        that.resetLocalProfileState();
+        api.updateCartBadge();
+        wx.showToast({ title: '已退出登录', icon: 'success' });
+      }
     });
-    wx.showToast({ title: '已退出登录', icon: 'success' });
   },
 
   // 显示用户信息编辑弹窗
@@ -683,11 +717,7 @@ Page({
       if (code !== 200) {
         if (code === 401) {
           api.clearToken();
-          that.setData({
-            isLoggedIn: false,
-            userPhone: '',
-            maskedUserPhone: ''
-          });
+          that.resetLocalProfileState();
           that.resetBluetoothDebugMenu();
         }
 
@@ -760,10 +790,14 @@ Page({
     app.openCustomerServiceChat();
   },
 
+  showLoginHint() {
+    wx.showToast({ title: '请先点击上方登录', icon: 'none' });
+  },
+
   // 商城快捷入口
   goToCart() {
     if (!api.isLoggedIn()) {
-      wx.showToast({ title: '请先在个人中心登录', icon: 'none' });
+      this.showLoginHint();
       return;
     }
     wx.switchTab({ url: '/pages/shop/cart/index' });
@@ -771,7 +805,7 @@ Page({
 
   goToOrders() {
     if (!api.isLoggedIn()) {
-      wx.showToast({ title: '请先在个人中心登录', icon: 'none' });
+      this.showLoginHint();
       return;
     }
     wx.navigateTo({ url: '/pages/shop/order-list/index' });
@@ -779,7 +813,7 @@ Page({
 
   goToAddress() {
     if (!api.isLoggedIn()) {
-      wx.showToast({ title: '请先在个人中心登录', icon: 'none' });
+      this.showLoginHint();
       return;
     }
     wx.navigateTo({ url: '/pages/shop/address/index' });
@@ -790,8 +824,9 @@ Page({
   },
 
   goToBluetoothDebug() {
-    if (!api.isLoggedIn()) {
-      wx.showToast({ title: '请先在个人中心登录', icon: 'none' });
+    if (!api.requireLogin({
+      message: '登录后可校验当前账号是否具备蓝牙调试权限。'
+    })) {
       return;
     }
 

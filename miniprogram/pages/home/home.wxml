@@ -6,7 +6,7 @@
     </view>
     <view class="top-center">
       <image class="bg-image" src="/assets/BG.jpg" mode="aspectFill" />
-      <swiper indicator-dots="{{true}}" indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#ff6a45" autoplay="{{true}}" interval="{{3000}}" circular="{{true}}" bindchange="onSwiperChange" class="carousel-swiper">
+      <swiper indicator-dots="{{true}}" indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#ff6a45" autoplay="{{carouselAutoPlay}}" interval="{{carouselInterval}}" circular="{{true}}" bindchange="onSwiperChange" class="carousel-swiper">
         <swiper-item wx:for="{{carouselData}}" wx:key="index">
           <image class="carousel-image" src="{{item.imageUrl}}" mode="aspectFill"></image>
         </swiper-item>
@@ -76,6 +76,17 @@
 
       <view class="drawer-cancel" bindtap="onCloseActionSheet">
         <text class="drawer-cancel__text">取消</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{isConnectingDevice}}" class="connect-mask" catchtap="noop" catchtouchmove="noop">
+    <view class="connect-panel">
+      <view class="connect-spinner"></view>
+      <text class="connect-title">正在连接设备</text>
+      <text class="connect-device">{{connectingDeviceName}}</text>
+      <view class="connect-cancel" bindtap="cancelPendingConnect">
+        <text class="connect-cancel__text">取消</text>
       </view>
     </view>
   </view>

@@ -58,6 +58,25 @@ function hasInvoiceDownloadFiles(order) {
   return !!(order && (order.invoiceFileUrl || order.invoiceOfdUrl || order.invoiceZipUrl))
 }
 
+function getInvoiceNoticeText(order) {
+  var status = Number(order && order.invoiceStatus || 0)
+  var email = String(order && order.invoiceEmail || '').trim()
+
+  if (status === 2) {
+    return email
+      ? '电子发票已开具，请前往接收邮箱查看。'
+      : '电子发票已开具，请联系工作人员协助查看。'
+  }
+
+  if (status === 1) {
+    return email
+      ? '发票开具完成后会发送到接收邮箱，请留意查收。'
+      : '发票正在开具中，完成后可联系工作人员查看。'
+  }
+
+  return ''
+}
+
 function canApplyInvoice(order) {
   return Number(order && order.orderStatus) === 3
     && Number(order && order.invoiceStatus || 0) === 0
@@ -271,6 +290,7 @@ Page({
     shipmentTrackingTraces: [],
     shipmentTrackingMessage: '',
     invoiceStatusText: '',
+    invoiceNoticeText: '',
     canApplyInvoice: false,
     showInvoiceSection: false
   },
@@ -442,6 +462,7 @@ Page({
           canConfirmReceipt: canConfirmReceipt(rawOrder),
           showRefundClosedBuyAgainOnly: showRefundClosedBuyAgainOnly,
           invoiceStatusText: getInvoiceStatusText(rawOrder),
+          invoiceNoticeText: getInvoiceNoticeText(rawOrder),
           canApplyInvoice: canApplyInvoice(rawOrder),
           showInvoiceSection: shouldShowInvoiceSection(rawOrder),
           logistics: null,
@@ -614,6 +635,26 @@ Page({
     return errMsg.length > 22 ? '微信支付拉起失败，请稍后重试' : errMsg
   },
 
+  showPaymentFailure: function (err, cancelMessage) {
+    var isCanceled = this.isPaymentCanceled(err)
+    var rawMessage = String(err && (err.errMsg || err.message) || '').trim()
+    var message = isCanceled ? cancelMessage : this.resolvePaymentFailureMessage(err)
+
+    console.error('[wxpay] requestPayment fail:', err)
+
+    if (!isCanceled && message === '小程序支付配置异常，请联系管理员' && rawMessage) {
+      wx.showModal({
+        title: '支付失败',
+        content: rawMessage,
+        showCancel: false
+      })
+      return rawMessage
+    }
+
+    wx.showToast({ title: message, icon: 'none' })
+    return message
+  },
+
   payOrder: function () {
     var that = this
     that.requestMiniProgramLoginCode().then(function (loginCode) {
@@ -637,10 +678,7 @@ Page({
         },
         fail: function (err) {
           var isCanceled = that.isPaymentCanceled(err)
-          wx.showToast({
-            title: isCanceled ? '支付取消' : that.resolvePaymentFailureMessage(err),
-            icon: 'none'
-          })
+          that.showPaymentFailure(err, '支付取消')
           if (!isCanceled) {
             that.loadDetail()
           }

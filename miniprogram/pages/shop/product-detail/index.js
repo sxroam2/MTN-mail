@@ -461,8 +461,9 @@ Page({
 
   executeAddToCart: function (detail) {
     var that = this
-    if (!api.isLoggedIn()) {
-      wx.showToast({ title: '请先在个人中心登录', icon: 'none' })
+    if (!api.requireLogin({
+      message: '登录后可加入购物车，并同步到你的账号。'
+    })) {
       return
     }
     that.setData({ skuLoading: true })
@@ -481,8 +482,9 @@ Page({
 
   executeBuyNow: function (detail) {
     var that = this
-    if (!api.isLoggedIn()) {
-      wx.showToast({ title: '请先在个人中心登录', icon: 'none' })
+    if (!api.requireLogin({
+      message: '登录后可继续购买并查看订单进度。'
+    })) {
       return
     }
     that.setData({ showSkuDrawer: false, skuLoading: false, selectedPackage: detail.package, quantity: detail.quantity })
@@ -563,24 +565,29 @@ Page({
   },
 
   goAddressSelect: function () {
-    if (!api.isLoggedIn()) {
-      wx.showToast({ title: '请先在个人中心登录', icon: 'none' })
+    if (!api.requireLogin({
+      message: '登录后可选择和管理收货地址。'
+    })) {
       return
     }
-    wx.navigateTo({ url: '/pages/shop/address/index?select=1' })
+    addressUtil.navigateToAddressSelector(this, function (address) {
+      if (!addressUtil.isDomesticAddress(address)) {
+        wx.showToast({ title: '小程序暂不支持国际地址', icon: 'none' })
+        return
+      }
+
+      this.applyDeliveryAddress(address)
+    }.bind(this))
   },
 
   syncSelectedAddressFromPage: function () {
-    var pages = getCurrentPages()
-    var current = pages[pages.length - 1]
-    if (current && current._selectedAddress) {
-      if (addressUtil.isDomesticAddress(current._selectedAddress)) {
-        this.applyDeliveryAddress(current._selectedAddress)
+    addressUtil.consumeSelectedAddress(this, function (address) {
+      if (addressUtil.isDomesticAddress(address)) {
+        this.applyDeliveryAddress(address)
       } else {
         wx.showToast({ title: '小程序暂不支持国际地址', icon: 'none' })
       }
-      current._selectedAddress = null
-    }
+    }.bind(this))
   },
 
   loadDeliveryAddress: function () {
