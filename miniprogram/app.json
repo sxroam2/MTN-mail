@@ -21,8 +21,15 @@
     "pages/shop/refund-detail/index",
     "pages/debug/debug",
     "pages/bar/index",
-    "pages/equipment/equipment",
-    "pages/message/message"
+    "pages/equipment/equipment"
+  ],
+  "subPackages": [
+    {
+      "root": "sub-message",
+      "pages": [
+        "pages/message/message"
+      ]
+    }
   ],
   "window": {
     "navigationBarBackgroundColor": "#000",

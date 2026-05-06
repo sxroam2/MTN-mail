@@ -330,7 +330,7 @@ Page({
       }, true);
 
       wx.navigateTo({
-        url: '/pages/message/message'
+        url: '/sub-message/pages/message/message'
       });
     };
 

@@ -1,6 +1,6 @@
 import * as echarts from '../../components/ec-canvas/echarts';
 
-const bluetoothProfileUtil = require('../../utils/bluetooth-profile.js');
+const bluetoothProfileUtil = require('../../../utils/bluetooth-profile.js');
 
 function getCurrentPageInstance() {
   const pages = getCurrentPages();
