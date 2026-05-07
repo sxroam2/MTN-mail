@@ -67,13 +67,16 @@
             <text wx:if="{{ selectedPackage && selectedPackage.originalPriceText }}" class="original-price">¥{{ selectedPackage.originalPriceText }}</text>
           </view>
           <view class="product-name-row">
-            <text class="product-name">{{ productName }}</text>
+            <view class="product-name-wrap">
+              <text class="product-name">{{ productName }}</text>
+              <text wx:if="{{ productDescription }}" class="product-name-desc">{{ productDescription }}</text>
+            </view>
+            <button class="share-btn" open-type="share">
+              <van-icon name="share-o" size="20px" color="#999" />
+              <text class="share-text">分享</text>
+            </button>
           </view>
         </view>
-        <button class="share-btn" open-type="share">
-          <van-icon name="share-o" size="20px" color="#999" />
-          <text class="share-text">分享</text>
-        </button>
       </view>
     </view>
 
@@ -129,19 +132,21 @@
       <view class="section-title">商品参数</view>
       <!-- 多套餐对比模式 -->
       <block wx:if="{{ hasSpecCompare }}">
-        <view class="compare-table">
-          <view class="compare-header">
-            <view class="compare-key-cell"></view>
-            <view wx:for="{{ specCompareHeaders }}" wx:key="*this" class="compare-val-cell compare-header-cell">{{ item }}</view>
-          </view>
-          <block wx:for="{{ specCompareGroups }}" wx:key="name" wx:for-item="group">
-            <view class="compare-group-row">{{ group.name }}</view>
-            <view wx:for="{{ group.rows }}" wx:key="key" wx:for-item="row" class="compare-row">
-              <view class="compare-key-cell">{{ row.key }}</view>
-              <view wx:for="{{ row.values }}" wx:key="*this" wx:for-item="val" wx:for-index="vIdx" class="compare-val-cell">{{ val }}</view>
+        <scroll-view class="compare-scroll" scroll-x="true" enable-flex="true" show-scrollbar="false">
+          <view class="compare-table" style="width: {{ specCompareTableWidthRpx }}rpx;">
+            <view class="compare-header">
+              <view class="compare-key-cell"></view>
+              <view wx:for="{{ specCompareHeaders }}" wx:key="*this" class="compare-val-cell compare-header-cell">{{ item }}</view>
             </view>
-          </block>
-        </view>
+            <block wx:for="{{ specCompareGroups }}" wx:key="name" wx:for-item="group">
+              <view class="compare-group-row">{{ group.name }}</view>
+              <view wx:for="{{ group.rows }}" wx:key="key" wx:for-item="row" class="compare-row">
+                <view class="compare-key-cell">{{ row.key }}</view>
+                <view wx:for="{{ row.values }}" wx:key="*this" wx:for-item="val" wx:for-index="vIdx" class="compare-val-cell">{{ val }}</view>
+              </view>
+            </block>
+          </view>
+        </scroll-view>
       </block>
       <!-- 简单参数列表 -->
       <block wx:else>
@@ -211,7 +216,7 @@
       product="{{ product }}"
       productName="{{ productName }}"
       packages="{{ packages }}"
-      defaultThumbUrl="{{ (defaultDisplayPackage && defaultDisplayPackage.thumbUrl) || (images[0] && images[0].url) || '' }}"
+      defaultThumbUrl="{{ defaultPreviewImage }}"
       priceRangeText="{{ priceRangeText }}"
       selectedPackageId="{{ selectedPackage.id || 0 }}"
       initQuantity="{{ quantity }}"

@@ -38,10 +38,10 @@
           catchtap="onPkgTap"
         >
           <van-image
-            wx:if="{{ item.thumbUrl }}"
+            wx:if="{{ item.thumbUrl || (item.images && item.images.length) }}"
             width="56rpx"
             height="56rpx"
-            src="{{ item.thumbUrl }}"
+            src="{{ item.thumbUrl || ((item.images && item.images[0]) || '') }}"
             fit="cover"
             radius="8rpx"
           />

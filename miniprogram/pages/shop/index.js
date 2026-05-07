@@ -13,6 +13,19 @@ function formatPriceValue(value) {
   return normalized.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')
 }
 
+function stripProductBrandPrefix(value) {
+  var text = String(value || '').trim()
+  if (!text) {
+    return ''
+  }
+
+  var stripped = text
+    .replace(/^(迈瑟伦|MAXELLENT|Maxcellent|Maysellent|Mayselun|迈瑟倫)[\s\-—–·/,:：，、()（）【】]*/i, '')
+    .trim()
+
+  return stripped || text
+}
+
 function buildPriceRangeText(minPrice, maxPrice, fallbackPrice) {
   var resolvedMin = minPrice === null || minPrice === undefined || minPrice === '' ? null : Number(minPrice)
   if (isFinite(resolvedMin)) {
@@ -64,7 +77,7 @@ Page({
         var fallbackPrice = p.salePrice || p.price
         return {
           id: p.id,
-          title: p.title,
+          title: stripProductBrandPrefix(p.title || p.name || p.sku || ''),
           img: imageUtil.resolveImageUrl(p.img),
           price: p.price,
           salePrice: p.salePrice,

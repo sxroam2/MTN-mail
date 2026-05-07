@@ -15,6 +15,19 @@ function formatPriceValue(value) {
   return normalized.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')
 }
 
+function stripProductBrandPrefix(value) {
+  var text = String(value || '').trim()
+  if (!text) {
+    return ''
+  }
+
+  var stripped = text
+    .replace(/^(迈瑟伦|MAXELLENT|Maxcellent|Maysellent|Mayselun|迈瑟倫)[\s\-—–·/,:：，、()（）【】]*/i, '')
+    .trim()
+
+  return stripped || text
+}
+
 function buildPriceRangeText(packages, fallbackPrice) {
   var prices = (packages || []).map(function (pkg) {
     return Number(pkg.price)
@@ -107,6 +120,7 @@ Page({
     product: null,
     isLoggedIn: false,
     productName: '',
+    defaultPreviewImage: '',
     images: [],
     detailImages: [],
     productDescription: '',
@@ -115,6 +129,7 @@ Page({
     hasSpecCompare: false,
     specCompareHeaders: [],
     specCompareGroups: [],
+    specCompareTableWidthRpx: 0,
     packages: [],
     accessories: [],
     defaultDisplayPackage: null,
@@ -248,21 +263,28 @@ Page({
       var product = detail.product || {}
       var i18n = detail.i18n || {}
       // 产品名称优先取 i18n.name，回退到 sku
-      var productName = i18n.name || product.name || product.title || product.sku || ''
+      var productName = stripProductBrandPrefix(i18n.name || product.name || product.title || product.sku || '')
       // 按 imageType 分类图片
       var allApiImages = detail.images || []
-      var galleryImages = allApiImages.filter(function (img) {
-        return !img.imageType || img.imageType === 'gallery'
+      var productMainImages = allApiImages.filter(function (img) {
+        return img.imageType === 'main'
       }).map(function (img) {
         return { id: img.id, url: imageUtil.resolveImageUrl(img.imageUrl || img.url), altText: img.altText || '' }
       })
+      var galleryImages = (productMainImages.length ? productMainImages : allApiImages.filter(function (img) {
+        return img.imageType === 'card' || img.imageType === 'hero' || !img.imageType || img.imageType === 'gallery'
+      }).map(function (img) {
+        return { id: img.id, url: imageUtil.resolveImageUrl(img.imageUrl || img.url), altText: img.altText || '' }
+      }))
       var detailImages = allApiImages.filter(function (img) {
         return img.imageType === 'detail'
       }).map(function (img) {
         return { id: img.id, url: imageUtil.resolveImageUrl(img.imageUrl || img.url), altText: img.altText || '' }
       })
       if (galleryImages.length === 0) {
-        galleryImages = allApiImages.map(function (img) {
+        galleryImages = allApiImages.filter(function (img) {
+          return img.imageType !== 'detail'
+        }).map(function (img) {
           return { id: img.id, url: imageUtil.resolveImageUrl(img.imageUrl || img.url), altText: img.altText || '' }
         })
       }
@@ -292,6 +314,9 @@ Page({
         var pkgImages = (pkg.images || []).map(function (img) {
           return imageUtil.resolveImageUrl(img.imageUrl || img.url || '')
         })
+        var resolvedThumbUrl = thumbUrl
+          ? imageUtil.resolveImageUrl(thumbUrl)
+          : (pkgImages[0] || (productImages[0] && productImages[0].url) || '')
         return {
           id: pkgObj.id || pkg.id,
           name: pkgI18n.name || pkgObj.name || pkgObj.sku || pkg.name || pkg.packageName || '',
@@ -301,8 +326,9 @@ Page({
           originalPriceText: (pkgObj.originalPrice || pkg.originalPrice) ? formatPriceValue(pkgObj.originalPrice || pkg.originalPrice) : '',
           stock: pkgObj.stock || pkg.stock || 0,
           description: pkgI18n.description || pkgObj.description || pkg.description || '',
-          thumbUrl: thumbUrl ? imageUtil.resolveImageUrl(thumbUrl) : '',
+          thumbUrl: resolvedThumbUrl,
           images: pkgImages,
+          enableCompare: !!pkgObj.enableCompare,
           specValues: pkg.specValues || []
         }
       })
@@ -312,28 +338,51 @@ Page({
           imageUrl: imageUtil.resolveImageUrl(acc.imageUrl || acc.image || '')
         }
       })
-      var defaultDisplayPackage = packages.length > 0 ? packages[0] : null
+      var defaultDisplayPackage = null
       var isAllSoldOut = packages.length > 0 && packages.every(function (p) { return p.stock <= 0 })
       var priceRangeText = buildPriceRangeText(packages, product.basePrice || product.salePrice || 0)
 
       // 保存产品原始图片
       that._originalImages = productImages
 
-      // 默认显示第一个套餐图片，但不默认选中套餐
-      var displayImages = buildPackagePreviewImages(defaultDisplayPackage, productImages)
+      // 默认显示产品主图，点击套餐后再切换到套餐展示图片
+      var displayImages = productImages
 
-      // 构建参数对比表（多套餐时）
-      var hasSpecCompare = packages.length > 1 && packages.some(function (p) {
-        return p.specValues && p.specValues.length > 0
+      // 构建参数对比表（由统一开关控制，兼容旧数据里按参数标记的对比项）
+      var compareEnabled = packages.some(function (p) {
+        return !!p.enableCompare
+      }) || rawSpecs.some(function (spec) {
+        return !!spec.showInCompare
       })
+      var compareSpecs = rawSpecs.filter(function (spec) {
+        return !!spec.showInCompare
+      })
+      var compareSourceSpecs = compareSpecs.length > 0 ? compareSpecs : rawSpecs
+      var hasSpecCompare = packages.length > 1 && compareEnabled && compareSourceSpecs.length > 0
       var specCompareHeaders = []
       var specCompareGroups = []
+      var specCompareTableWidthRpx = 0
       if (hasSpecCompare) {
         specCompareHeaders = packages.map(function (p) { return p.name })
-        specCompareGroups = specGroupOrder.map(function (groupName) {
+        specCompareTableWidthRpx = Math.max(640, 180 + specCompareHeaders.length * 220)
+        var compareGroupMap = {}
+        var compareGroupOrder = []
+        compareSourceSpecs.forEach(function (spec) {
+          var groupName = spec.specGroupZh || '基本参数'
+          if (!compareGroupMap[groupName]) {
+            compareGroupMap[groupName] = []
+            compareGroupOrder.push(groupName)
+          }
+          compareGroupMap[groupName].push({
+            id: spec.id,
+            key: spec.specKeyZh || '',
+            value: spec.specValueZh || ''
+          })
+        })
+        specCompareGroups = compareGroupOrder.map(function (groupName) {
           return {
             name: groupName,
-            rows: (specGroupMap[groupName] || []).map(function (spec) {
+            rows: (compareGroupMap[groupName] || []).map(function (spec) {
               return {
                 key: spec.key,
                 values: packages.map(function (pkg) {
@@ -349,6 +398,7 @@ Page({
       that.setData({
         product: product,
         productName: productName,
+        defaultPreviewImage: (productImages[0] && productImages[0].url) || (detailImages[0] && detailImages[0].url) || '',
         productDescription: productDescription,
         images: displayImages,
         detailImages: detailImages,
@@ -357,6 +407,7 @@ Page({
         hasSpecCompare: hasSpecCompare,
         specCompareHeaders: specCompareHeaders,
         specCompareGroups: specCompareGroups,
+        specCompareTableWidthRpx: specCompareTableWidthRpx,
         packages: packages,
         accessories: accessories,
         defaultDisplayPackage: defaultDisplayPackage,
@@ -521,7 +572,15 @@ Page({
         images: buildPackagePreviewImages(pkg, this._originalImages || this.data.images),
         currentSwiper: 0
       })
+      return
     }
+
+    this.setData({
+      selectedPackage: null,
+      quantity: 1,
+      images: (this._originalImages || []).slice(),
+      currentSwiper: 0
+    })
   },
 
   /** SKU 组件 - 加入购物车 */
@@ -560,7 +619,9 @@ Page({
     return {
       title: this.data.productName || '迈瑟伦商品',
       path: '/pages/shop/product-detail/index?id=' + this.data.productId,
-      imageUrl: this.data.images.length > 0 ? this.data.images[0].url : ''
+      imageUrl: this._originalImages && this._originalImages.length > 0
+        ? this._originalImages[0].url
+        : (this.data.images.length > 0 ? this.data.images[0].url : '')
     }
   },
 

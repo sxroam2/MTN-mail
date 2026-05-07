@@ -39,7 +39,7 @@ Component({
   },
 
   observers: {
-    'show, packages, selectedPackageId': function (show) {
+    'show, packages, selectedPackageId, defaultThumbUrl': function (show) {
       if (!show) return
       var packages = this.properties.packages || []
       var selectedId = this.properties.selectedPackageId
@@ -66,6 +66,7 @@ Component({
   methods: {
     _resolveThumb: function (pkg) {
       if (pkg && pkg.thumbUrl) return pkg.thumbUrl
+      if (pkg && pkg.images && pkg.images.length > 0) return pkg.images[0]
       return this.properties.defaultThumbUrl || ''
     },
 
@@ -77,6 +78,22 @@ Component({
       var pkgId = e.currentTarget.dataset.id
       var pkg = (this.properties.packages || []).find(function (p) { return p.id === pkgId })
       if (!pkg || pkg.stock <= 0) return
+
+      if (this.data.selectedPkg && this.data.selectedPkg.id === pkg.id) {
+        this.setData({
+          selectedPkg: {},
+          quantity: 1,
+          maxStock: 1,
+          thumbUrl: this._resolveThumb(null)
+        })
+        this.triggerEvent('selectpackage', {
+          package: null,
+          canceled: true,
+          packageId: pkgId
+        })
+        return
+      }
+
       this.setData({
         selectedPkg: pkg,
         quantity: 1,

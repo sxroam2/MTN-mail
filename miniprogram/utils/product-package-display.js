@@ -31,6 +31,10 @@ function buildPackageMetaMap(detail) {
     var pkgObj = pkg.package || pkg || {}
     var pkgI18n = pkg.i18n || {}
     var packageId = pkgObj.id || pkg.id
+    var images = Array.isArray(pkg.images) ? pkg.images : []
+    var firstImageUrl = images.length > 0
+      ? imageUtil.resolveImageUrl((images[0] && (images[0].imageUrl || images[0].url)) || '')
+      : ''
 
     if (!packageId) {
       return
@@ -39,7 +43,7 @@ function buildPackageMetaMap(detail) {
     map[packageId] = {
       name: pkgI18n.name || pkgObj.name || pkg.packageName || pkgObj.sku || '',
       description: pkgI18n.description || pkgObj.description || pkg.description || '',
-      thumbUrl: pkgObj.thumbUrl ? imageUtil.resolveImageUrl(pkgObj.thumbUrl) : ''
+      thumbUrl: pkgObj.thumbUrl ? imageUtil.resolveImageUrl(pkgObj.thumbUrl) : firstImageUrl
     }
   })
 
