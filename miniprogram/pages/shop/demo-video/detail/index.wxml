@@ -34,7 +34,13 @@
 
     <!-- 标题 + 标签信息 -->
     <view class="info-card">
-      <text class="video-title">{{ currentVideo.title }}</text>
+      <view class="title-row">
+        <view class="video-title">{{ currentVideo.title }}</view>
+        <button class="title-share-btn" open-type="share">
+          <van-icon name="share-o" size="16px" color="#ffffff" />
+          <text class="title-share-text">分享</text>
+        </button>
+      </view>
 
       <view class="meta-row">
         <text wx:if="{{ currentCategory }}" class="meta-tag">{{ currentCategory }}</text>

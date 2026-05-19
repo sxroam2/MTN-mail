@@ -24,6 +24,22 @@ Page({
     })
   },
 
+  buildShareOptions: function () {
+    var currentVideo = this.data.currentVideo || {}
+    var videoKey = String(currentVideo.itemKey || this.currentVideoKey || '').trim()
+    var path = '/pages/shop/demo-video/detail/index'
+
+    if (videoKey) {
+      path += '?video=' + encodeURIComponent(videoKey)
+    }
+
+    return {
+      title: currentVideo.title || '迈瑟伦演示视频',
+      path: path,
+      imageUrl: String(currentVideo.coverUrl || currentVideo.imageUrl || currentVideo.imageUrlMobile || '').trim()
+    }
+  },
+
   onLoad: function (options) {
     this.allVideoCards = []
     this.currentVideoKey = String(options.video || '').trim()
@@ -131,5 +147,9 @@ Page({
     wx.redirectTo({
       url: '/pages/shop/demo-video/index'
     })
+  },
+
+  onShareAppMessage: function () {
+    return this.buildShareOptions()
   }
 })

@@ -76,12 +76,45 @@
   box-shadow: 0 18rpx 44rpx rgba(0, 0, 0, 0.16);
 }
 
+.title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+}
+
 .video-title {
-  display: block;
+  flex: 1;
+  min-width: 0;
   color: #ffffff;
   font-size: 36rpx;
   line-height: 1.35;
   font-weight: 700;
+}
+
+.title-share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  flex-shrink: 0;
+  min-width: 132rpx;
+  height: 60rpx;
+  margin: 0;
+  padding: 0 20rpx;
+  border: none;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #ff6a45 0%, #ff4d4f 100%);
+  line-height: 1;
+}
+
+.title-share-btn::after {
+  border: none;
+}
+
+.title-share-text {
+  color: #ffffff;
+  font-size: 22rpx;
+  font-weight: 600;
 }
 
 .meta-row {

@@ -14,8 +14,31 @@ Page({
 		videoCards: []
 	},
 
+	openShareMenu: function () {
+		if (typeof wx.showShareMenu !== 'function') {
+			return
+		}
+
+		wx.showShareMenu({
+			menus: ['shareAppMessage', 'shareTimeline']
+		})
+	},
+
+	buildShareOptions: function () {
+		var primaryVideo = this.data.videoCards && this.data.videoCards.length > 0
+			? this.data.videoCards[0]
+			: (this.allVideoCards && this.allVideoCards.length > 0 ? this.allVideoCards[0] : null)
+
+		return {
+			title: this.data.pageTitle || '迈瑟伦演示视频',
+			path: '/pages/shop/demo-video/index',
+			imageUrl: primaryVideo && primaryVideo.coverUrl ? primaryVideo.coverUrl : ''
+		}
+	},
+
 	onLoad: function () {
 		this.allVideoCards = []
+		this.openShareMenu()
 		this.loadPageContent()
 	},
 
@@ -146,5 +169,18 @@ Page({
 		wx.navigateTo({
 			url: '/pages/shop/demo-video/detail/index?video=' + encodeURIComponent(videoKey)
 		})
+	},
+
+	onShareAppMessage: function () {
+		return this.buildShareOptions()
+	},
+
+	onShareTimeline: function () {
+		var shareOptions = this.buildShareOptions()
+		return {
+			title: shareOptions.title,
+			query: '',
+			imageUrl: shareOptions.imageUrl
+		}
 	}
 })

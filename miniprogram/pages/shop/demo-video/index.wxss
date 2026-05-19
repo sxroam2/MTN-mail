@@ -162,7 +162,7 @@
 }
 
 .single-mode .card-cover-wrap {
-  width: 248rpx;
+  width: 310rpx;
   flex-shrink: 0;
   aspect-ratio: unset;
   height: auto;
